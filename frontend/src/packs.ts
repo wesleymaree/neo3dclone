@@ -130,6 +130,15 @@ export interface PackItem {
   variant?: Record<string, string>;
   /** Slots its live parts are tied to (3.4): the editor links an entity to each. */
   slots?: PackSlot[];
+  /** A triangle mesh (fork: an imported .obj or .step model, see own-models.ts), drawn besides any parts. */
+  mesh?: PackMesh;
+}
+
+/** A mesh in fractions of the item's box: x and z from -0.5 to 0.5 (front at +z), y from 0 to 1; rgb bytes per vertex. */
+export interface PackMesh {
+  v: Float32Array;
+  i: Uint16Array | Uint32Array;
+  c: Uint8Array | null;
 }
 
 export interface FurniturePack {

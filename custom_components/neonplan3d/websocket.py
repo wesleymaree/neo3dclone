@@ -32,6 +32,7 @@ from .const import (
 from .diagnostics_report import DiagnosticsError, DiagnosticsReporter
 from .locate.recorder import ws_locate_rec
 from .locate.ws import COMMANDS as LOCATE_COMMANDS
+from .models import COMMANDS as MODEL_COMMANDS
 from .packs import MAX_PACK_SIZE, PackError, module_sha, parts_of, verify_pack
 from .schema import BUILDING_SCHEMA, IMAGE_DATA, empty_building
 from .screens import KINDS, screens_of
@@ -108,7 +109,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_previews_get,
     ):
         websocket_api.async_register_command(hass, command)
-    for command in LOCATE_COMMANDS:
+    for command in (*LOCATE_COMMANDS, *MODEL_COMMANDS):
         websocket_api.async_register_command(hass, command)
 
 

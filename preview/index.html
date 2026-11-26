@@ -110,6 +110,8 @@
 
       // furniture packs: the invented demo pack, plus local pack sources from private/ (not in git)
       let importedPacks = null;
+      // fork: own 3D models imported in the editor (kept for this visit only)
+      let ownModels = [];
       const moduleCode = {};
       async function previewPacks() {
         if (importedPacks === null) {
@@ -233,7 +235,7 @@
               }
               // the online demo has no private packs: their items would stand as grey boxes, so leave them out
               const packs = await previewPacks();
-              const known = new Set(packs.flatMap((p) => p.items.map((it) => `pack:${p.id}:${it.id}`)));
+              const known = new Set([...packs.flatMap((p) => p.items.map((it) => `pack:${p.id}:${it.id}`)), ...ownModels.map((m) => `pack:own.models:${m.id}`)]);
               const shown = structuredClone(building);
               for (const f of shown.floors) f.furniture = f.furniture.filter((m) => !m.type.startsWith("pack:") || known.has(m.type));
               return { building: shown, revision };
@@ -399,6 +401,16 @@
                 on("binary_sensor.garage_auto", 28),
               ]);
             }
+            case "neonplan3d/models/list":
+              return { models: ownModels };
+            case "neonplan3d/models/add": {
+              const id = Math.random().toString(16).slice(2, 14);
+              ownModels = [...ownModels, { ...msg.model, name: msg.model.name.trim(), id }];
+              return { id, name: msg.model.name.trim() };
+            }
+            case "neonplan3d/models/remove":
+              ownModels = ownModels.filter((m) => m.id !== msg.model_id);
+              return null;
             default:
               throw { code: "unknown_command", message: msg.type };
           }

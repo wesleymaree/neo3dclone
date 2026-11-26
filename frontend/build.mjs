@@ -32,7 +32,7 @@ const cardEditorConfig = { ...common, entryPoints: ["src/card-editor.ts"], outfi
 const version = JSON.parse(readFileSync("../custom_components/neonplan3d/manifest.json", "utf8")).version;
 // the editor is only needed by admins who open it, so it is a bundle of its own as well
 // (it draws furniture previews with the 3D bundle, so it knows that bundle's hash too; card templates use the card editor)
-const editorConfig = (viewerHash, locateHash, cardEditorHash, osmHash) => ({
+const editorConfig = (viewerHash, locateHash, cardEditorHash, osmHash, modelsHash = "dev") => ({
   ...common,
   entryPoints: ["src/components/editor.ts"],
   outfile: `${out}/neonplan3d-editor.js`,
@@ -42,6 +42,7 @@ const editorConfig = (viewerHash, locateHash, cardEditorHash, osmHash) => ({
     __FP3D_LOCATE_HASH__: JSON.stringify(locateHash),
     __FP3D_CARD_EDITOR_HASH__: JSON.stringify(cardEditorHash),
     __FP3D_OSM_HASH__: JSON.stringify(osmHash),
+    __FP3D_MODELS_HASH__: JSON.stringify(modelsHash),
     // the overview of the open screens compares their versions with this one
     __FP3D_VERSION__: JSON.stringify(version),
   },
@@ -50,6 +51,8 @@ const editorConfig = (viewerHash, locateHash, cardEditorHash, osmHash) => ({
 const timeTravelConfig = { ...common, entryPoints: ["src/timetravel/entry.ts"], outfile: `${out}/neonplan3d-timetravel.js` };
 // the fun packs (pets …) only load when one is unlocked and switched on; three.js is lent by the 3D bundle
 const funConfig = { ...common, entryPoints: ["src/fun/entry.ts"], outfile: `${out}/neonplan3d-fun.js` };
+// fork: reading .obj and .step files into furniture only loads when an admin imports a model
+const modelsConfig = { ...common, entryPoints: ["src/models/entry.ts"], outfile: `${out}/neonplan3d-models.js` };
 // voice (the microphone probe for now) only loads when it is asked for
 const voiceConfig = { ...common, entryPoints: ["src/voice/entry.ts"], outfile: `${out}/neonplan3d-voice.js` };
 // the locating setup assistant only loads when an admin opens it
@@ -92,6 +95,9 @@ function copyFonts() {
   // further languages, fetched by the bundles only when Home Assistant runs in them
   mkdirSync(`${out}/lang`, { recursive: true });
   for (const l of LANGS) if (existsSync(`lang/${l}.json`)) copyFileSync(`lang/${l}.json`, `${out}/lang/${l}.json`);
+  // fork: OpenCascade (LGPL-2.1, unmodified) reads STEP files in the browser; fetched only while a model is imported
+  mkdirSync(`${out}/occt`, { recursive: true });
+  for (const f of ["occt-import-js.js", "occt-import-js.wasm", "license.occt-import-js.txt", "license.occt.txt"]) copyFileSync(`node_modules/occt-import-js/dist/${f}`, `${out}/occt/${f}`);
   for (const [pkg, file, name] of FONTS) {
     const dir = `node_modules/@fontsource-variable/${pkg}`;
     copyFileSync(`${dir}/files/${file}`, `${out}/fonts/${name}`);
@@ -181,18 +187,19 @@ function copyFonts() {
 // 3D 928 KB on 2026-11-21: a finger or the mouse on a pin, a name or a glass card turns and zooms the house (#1248, #1271)
 // 3D 940 KB on 2026-11-23: the fixes of 4.0.2 (camera cones over steps, a terrace's row on the map, robots across floors)
 // locate 170 KB on 2026-11-25: it carries the wall maths of the plan, which grew by the rule for walls in line (#1326) – it had stood at 160.0
-const BUDGET = { "neonplan3d.js": 870 * 1024, "neonplan3d-fun.js": 40 * 1024, "neonplan3d-voice.js": 60 * 1024, "neonplan3d-locate.js": 170 * 1024, "neonplan3d-osm.js": 20 * 1024, "neonplan3d-timetravel.js": 120 * 1024, "neonplan3d-3d.js": 940 * 1024, "neonplan3d-editor.js": 1160 * 1024, "neonplan3d-card-editor.js": 340 * 1024 };
+const BUDGET = { "neonplan3d.js": 870 * 1024, "neonplan3d-fun.js": 40 * 1024, "neonplan3d-voice.js": 60 * 1024, "neonplan3d-locate.js": 170 * 1024, "neonplan3d-osm.js": 20 * 1024, "neonplan3d-timetravel.js": 120 * 1024, "neonplan3d-3d.js": 940 * 1024, "neonplan3d-editor.js": 1180 * 1024, "neonplan3d-card-editor.js": 340 * 1024, "neonplan3d-models.js": 40 * 1024 };
 
 copyFonts();
 if (watch) {
   // in watch mode the hash is not tracked; a dev reload fetches the bundle anyway
-  for (const c of [viewerConfig, editorConfig("dev", "dev", "dev", "dev"), cardEditorConfig, timeTravelConfig, funConfig, voiceConfig, locateConfig, osmConfig, mainConfig("dev", "dev", "dev", "dev", "dev", "dev", "dev")]) await (await context(c)).watch();
+  for (const c of [viewerConfig, modelsConfig, editorConfig("dev", "dev", "dev", "dev"), cardEditorConfig, timeTravelConfig, funConfig, voiceConfig, locateConfig, osmConfig, mainConfig("dev", "dev", "dev", "dev", "dev", "dev", "dev")]) await (await context(c)).watch();
 } else {
   await build(viewerConfig);
   await build(locateConfig);
   await build(osmConfig);
   await build(cardEditorConfig);
-  const editor = editorConfig(hashOf(viewerConfig.outfile), hashOf(locateConfig.outfile), hashOf(cardEditorConfig.outfile), hashOf(osmConfig.outfile));
+  await build(modelsConfig);
+  const editor = editorConfig(hashOf(viewerConfig.outfile), hashOf(locateConfig.outfile), hashOf(cardEditorConfig.outfile), hashOf(osmConfig.outfile), hashOf(modelsConfig.outfile));
   await build(editor);
   await build(timeTravelConfig);
   await build(funConfig);

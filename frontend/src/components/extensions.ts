@@ -23,6 +23,7 @@ import {
 import { DISCORD_URL, isBeta, supporterUrl } from "../beta.ts";
 import { copyText, PRINT_URL } from "../print.ts";
 import { FEATURES, FUN, knownFeature, manualUrl, registerUrl, released, shopUrl, unlockedFeatures, type Feature, packLacksModule } from "../features.ts";
+import { OWN_PACK_ID } from "../own-models.ts";
 import type { Building } from "../model.ts";
 import { translate, type I18nKey } from "../i18n.ts";
 import { packName, type FurniturePack } from "../packs.ts";
@@ -536,7 +537,8 @@ export class Extensions extends LitElement {
 
   private renderPacks() {
     // modules and Pro add-ons (modules soon) have their own section below: here only packs with furniture
-    const packs = (this.packs ?? []).filter((p) => !p.module && !p.features?.length);
+    // fork: the own 3D models are managed in the editor's furniture library, not here
+    const packs = (this.packs ?? []).filter((p) => !p.module && !p.features?.length && p.id !== OWN_PACK_ID);
     const items = packs.reduce((s, p) => s + p.items.length, 0);
     return html`<section class="fp3d-ext-card">
       <h3>${this.t("packs")}</h3>

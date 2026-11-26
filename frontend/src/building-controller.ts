@@ -2,9 +2,10 @@
 // of plans and switches between them.
 
 import type { ReactiveController, ReactiveControllerHost } from "lit";
-import { fetchBuilding, isStalePlan, listPacks, listPlans, MAIN_PLAN, saveBuilding, subscribeBuilding, subscribePlans, type PlanEntry } from "./api.ts";
+import { fetchBuilding, isStalePlan, listModels, listPacks, listPlans, MAIN_PLAN, saveBuilding, subscribeBuilding, subscribePlans, type PlanEntry } from "./api.ts";
 import { initDiagnostics } from "./diagnostics.ts";
 import { normalizeBuilding, type Building } from "./model.ts";
+import { modelsPack } from "./own-models.ts";
 import { setPacks, type FurniturePack } from "./packs.ts";
 import type { HomeAssistant } from "./types.ts";
 
@@ -319,7 +320,10 @@ export class BuildingController implements ReactiveController {
   async reloadPacks(): Promise<void> {
     if (!this.hass) return;
     try {
-      this.packs = await listPacks(this.hass);
+      const [packs, models] = await Promise.all([listPacks(this.hass), listModels(this.hass).catch(() => [])]);
+      // fork: the imported 3D models come as one local pack
+      const own = modelsPack(models);
+      this.packs = own ? [...packs, own] : packs;
       this.packTries = 0;
     } catch (err) {
       // a backend without packs (before a restart) has none; any other failure – the list is large, the connection

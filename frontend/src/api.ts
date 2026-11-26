@@ -1,6 +1,7 @@
 // Websocket calls to the backend (custom_components/neonplan3d/websocket.py).
 
 import type { Previews } from "./library-index.ts";
+import type { OwnModel } from "./own-models.ts";
 import type { Building } from "./model.ts";
 import type { FurniturePack } from "./packs.ts";
 import type { HomeAssistant } from "./types.ts";
@@ -272,6 +273,20 @@ export async function restoreSnapshot(hass: HomeAssistant, snapshotId: string, p
 export async function listPacks(hass: HomeAssistant): Promise<FurniturePack[]> {
   const res = await hass.callWS<{ packs: FurniturePack[] }>({ type: "neonplan3d/packs/list" });
   return res.packs;
+}
+
+/** Own 3D models (fork): imported .obj/.step furniture, kept apart from the packs. */
+export async function listModels(hass: HomeAssistant): Promise<OwnModel[]> {
+  const res = await hass.callWS<{ models: OwnModel[] }>({ type: "neonplan3d/models/list" });
+  return res.models;
+}
+
+export function addModel(hass: HomeAssistant, model: Omit<OwnModel, "id" | "created">): Promise<{ id: string; name: string }> {
+  return hass.callWS<{ id: string; name: string }>({ type: "neonplan3d/models/add", model });
+}
+
+export function removeModel(hass: HomeAssistant, modelId: string): Promise<void> {
+  return hass.callWS<void>({ type: "neonplan3d/models/remove", model_id: modelId });
 }
 
 export interface ImportedPack {

@@ -170,8 +170,11 @@ import { planLabel } from "./plan-picker.ts";
 import { deleteDiagnostics, getDiagnostics, setDiagnostics, type DiagnosticsStatus } from "../api.ts";
 import { load3d } from "../load3d.ts";
 import "./library.ts";
-import { basicTypes, buildIndex, roomKindOf, shopText, type LibraryEntry, type Previews } from "../library-index.ts";
-import { getPreviews } from "../api.ts";
+import { basicTypes, buildIndex, KINDS, roomKindOf, shopText, type LibraryEntry, type Previews } from "../library-index.ts";
+import { addModel, getPreviews, removeModel } from "../api.ts";
+import { loadModels } from "../load-models.ts";
+import type { Prepared, ReadModel, Unit } from "../models/entry.ts";
+import { OWN_PACK_ID } from "../own-models.ts";
 import { packsVersion as libPacksVersion } from "../packs.ts";
 import type { WallMode } from "../viewer/viewer3d.ts";
 import { furnitureName } from "../furniture-names.ts";
@@ -183,6 +186,18 @@ type FixKind = "room" | "opening" | "furniture" | "device" | "wall" | "outdoor";
 
 /** Fork: the shop is gone (no locked shop furniture, offers or sign-up hints). */
 const FORK_NO_SHOP = true;
+
+/** Fork: a 3D model file on its way into the library. */
+interface ModelDraft {
+  read: ReadModel | null;
+  name: string;
+  group: string;
+  unit: Unit;
+  zUp: boolean;
+  prepared: Prepared | null;
+  busy: boolean;
+  error: string | null;
+}
 /** Highest mount height the backend accepts (schema: 0–10 m); "40" meant as centimetres would refuse every save. */
 const MAX_MOUNT_Y = 10;
 /** How far below the floor a piece outside the rooms may stand: steps down to a sunken terrace (#897). */
@@ -405,6 +420,7 @@ export class Fp3dEditor extends LitElement {
     narrow: { type: Boolean },
     packs: { attribute: false },
     _preview: { state: true },
+    _modelImport: { state: true },
     _doc: { state: true },
     _doc3d: { state: true },
     _split: { state: true },
@@ -519,6 +535,8 @@ export class Fp3dEditor extends LitElement {
   /** Result of the last pack import. */
   /** Picture of the furniture under the pointer in the library. */
   private declare _preview: { type: string; url: string | null; left: number; top: number } | null;
+  /** Fork: a 3D model file being imported (read, waiting for its name, category, unit and up axis). */
+  private declare _modelImport: ModelDraft | null;
   private declare _doc: Building;
   /** The draft as the 3D pane shows it (follows _doc with a short delay, so drags stay smooth). */
   private declare _doc3d: Building;
@@ -900,6 +918,7 @@ export class Fp3dEditor extends LitElement {
     }
     this._sideMin = min;
     this._preview = null;
+    this._modelImport = null;
     this._measureLen = 3;
     this._packages = false;
     this._rectSize = [4, 3];
@@ -13675,11 +13694,118 @@ export class Fp3dEditor extends LitElement {
         }}
       ></fp3d-library>
     </section>
-    <div class="fp3d-ext-teaser">
-      <b>${this.t("ext_teaser_title")}</b>
-      <span class="fp3d-sub">${this.t("ext_teaser_text")}</span>
-      <button class="fp3d-btn fp3d-primary" @click=${() => this.dispatchEvent(new CustomEvent("open-extensions", { bubbles: true, composed: true }))}>${this.t("ext_open")}</button>
+    ${this.renderModelImport()}`;
+  }
+
+  /** Fork: own 3D models – the import button, the form for a read file, and the models imported so far. */
+  private renderModelImport() {
+    if (!this.isAdmin) return nothing;
+    const draft = this._modelImport;
+    const own = (this.packs ?? []).find((p) => p.id === OWN_PACK_ID)?.items ?? [];
+    const lang = this.hass?.language ?? "en";
+    const metres = (size: number[]) => size.map((m) => m.toLocaleString(lang, { maximumFractionDigits: 2 })).join(" × ");
+    const set = (patch: Partial<ModelDraft>) => this.updateModelDraft(patch);
+    return html`<div class="fp3d-ext-teaser fp3d-model-import">
+      <b>📦 ${this.t("model_title")}</b>
+      <span class="fp3d-sub">${this.t("model_hint")}</span>
+      ${draft?.read
+        ? html`<div class="fp3d-model-form">
+            <label>${this.t("model_name")} <input type="text" maxlength="80" .value=${draft.name} @input=${(e: Event) => set({ name: (e.target as HTMLInputElement).value })} /></label>
+            <label
+              >${this.t("model_group")}
+              <select @change=${(e: Event) => set({ group: (e.target as HTMLSelectElement).value })}>
+                ${KINDS.map((k) => html`<option value=${k} ?selected=${draft.group === k}>${this.t(`lib_kind_${k}` as I18nKey)}</option>`)}
+              </select></label
+            >
+            <label
+              >${this.t("model_unit")}
+              <select @change=${(e: Event) => set({ unit: (e.target as HTMLSelectElement).value as ModelDraft["unit"] })}>
+                ${(["mm", "cm", "m", "in", "ft"] as const).map((u) => html`<option value=${u} ?selected=${draft.unit === u}>${u}</option>`)}
+              </select></label
+            >
+            <label class="fp3d-check"><input type="checkbox" .checked=${draft.zUp} @change=${(e: Event) => set({ zUp: (e.target as HTMLInputElement).checked })} /> ${this.t("model_z_up")}</label>
+            ${draft.prepared
+              ? html`<span class="fp3d-sub">${this.t("model_size", { size: metres(draft.prepared.size), n: draft.prepared.triangles.toLocaleString(lang) })}${draft.prepared.simplified ? ` · ${this.t("model_simplified")}` : ""}</span>`
+              : nothing}
+            <span class="fp3d-model-buttons">
+              <button class="fp3d-btn fp3d-primary" ?disabled=${draft.busy || !draft.prepared || !draft.name.trim()} @click=${() => void this.saveModel()}>${this.t("model_save")}</button>
+              <button class="fp3d-btn" ?disabled=${draft.busy} @click=${() => (this._modelImport = null)}>${this.t("cancel")}</button>
+            </span>
+          </div>`
+        : html`<label class="fp3d-btn fp3d-primary"
+            >${draft?.busy ? this.t("model_reading") : this.t("model_import")}
+            <input type="file" accept=".obj,.mtl,.step,.stp,.iges,.igs" multiple hidden ?disabled=${!!draft?.busy} @change=${(e: Event) => void this.readModelFiles(e)}
+          /></label>`}
+      ${draft?.error ? html`<span class="fp3d-sub fp3d-pack-error">${draft.error}</span>` : nothing}
+      ${own.map(
+        (it) => html`<span class="fp3d-model-row"
+          ><span>${packItemName(it, lang)} <span class="fp3d-sub">${metres(it.size)} m</span></span>
+          <button class="fp3d-btn" title=${this.t("delete")} @click=${() => void this.removeOwnModel(it.id, packItemName(it, lang))}>✕</button></span
+        >`,
+      )}
     </div>`;
+  }
+
+  private modelsLib: Awaited<ReturnType<typeof loadModels>> | null = null;
+
+  /** Reads the chosen model file (and an .mtl beside an .obj) and opens the form for it. */
+  private async readModelFiles(e: Event): Promise<void> {
+    const input = e.target as HTMLInputElement;
+    const files = [...(input.files ?? [])];
+    input.value = "";
+    if (!files.length) return;
+    const empty: ModelDraft = { read: null, name: "", group: "deco", unit: "m", zUp: false, prepared: null, busy: true, error: null };
+    this._modelImport = empty;
+    try {
+      const lib = (this.modelsLib ??= await loadModels());
+      const read = await lib.readModel(files);
+      this._modelImport = { ...empty, read, name: read.name, unit: read.unit, zUp: read.zUp, busy: false };
+      this.updateModelDraft({});
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      const key = msg === "unsupported" ? "model_error_type" : msg === "too detailed" ? "model_error_detail" : "model_error_read";
+      this._modelImport = { ...empty, busy: false, error: this.t(key) };
+    }
+  }
+
+  /** A change in the form: the model is fitted again when the unit or the up axis changes its size. */
+  private updateModelDraft(patch: Partial<ModelDraft>): void {
+    const old = this._modelImport;
+    const read = old?.read;
+    if (!old || !read || !this.modelsLib) return;
+    const next: ModelDraft = { ...old, ...patch, error: null };
+    if (!old.prepared || patch.unit !== undefined || patch.zUp !== undefined) {
+      try {
+        next.prepared = this.modelsLib.prepare(read.raw, next.unit, next.zUp);
+      } catch {
+        next.prepared = null;
+        next.error = this.t("model_error_detail");
+      }
+    }
+    this._modelImport = next;
+  }
+
+  private async saveModel(): Promise<void> {
+    const draft = this._modelImport;
+    if (!draft?.prepared || !this.hass) return;
+    this._modelImport = { ...draft, busy: true, error: null };
+    try {
+      await addModel(this.hass, { name: draft.name.trim(), size: draft.prepared.size, group: draft.group, mesh: draft.prepared.mesh });
+      this._modelImport = null;
+      this.dispatchEvent(new CustomEvent("packs-changed", { bubbles: true, composed: true }));
+    } catch (err) {
+      const code = (err as { code?: string } | null)?.code;
+      this._modelImport = { ...draft, busy: false, error: this.t(code === "unknown_command" ? "model_error_restart" : "model_error_save") };
+    }
+  }
+
+  private async removeOwnModel(id: string, name: string): Promise<void> {
+    if (!this.hass || !confirm(this.t("model_remove_confirm", { name }))) return;
+    try {
+      await removeModel(this.hass, id);
+    } finally {
+      this.dispatchEvent(new CustomEvent("packs-changed", { bubbles: true, composed: true }));
+    }
   }
 
   /** Picture of an item, drawn by the 3D bundle and shown left of its button. */
@@ -17850,6 +17976,30 @@ export class Fp3dEditor extends LitElement {
         border: 1px solid var(--fp3d-accent);
         border-radius: 12px;
         background: linear-gradient(135deg, rgba(55, 224, 255, 0.08), rgba(91, 124, 255, 0.08));
+      }
+      .fp3d-model-form {
+        display: grid;
+        gap: 8px;
+      }
+      .fp3d-model-form label:not(.fp3d-check) {
+        display: grid;
+        gap: 3px;
+      }
+      .fp3d-model-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .fp3d-model-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-width: 0;
+      }
+      .fp3d-model-row > span {
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .fp3d-pin {
         border: 0;

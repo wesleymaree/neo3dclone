@@ -6,7 +6,7 @@
 import { Color } from "three";
 import type { Furniture, Vec2 } from "../model.ts";
 import { builtinBase, gangsOf, stairsULayout, POOL_VALVE_Y } from "../model.ts";
-import { adventCandles, isRobotVacuum, mountBase, packItem, packMotion, packMovingPart, packRobotCentre, packRobotPart, packScreen, packSpinAxis, type PackItem, type PackMotion, type PackPart } from "../packs.ts";
+import { adventCandles, isRobotVacuum, mountBase, packItem, packMotion, packMovingPart, packRobotCentre, packRobotPart, packScreen, packSpinAxis, type PackItem, type PackMesh, type PackMotion, type PackPart } from "../packs.ts";
 import { fitParts } from "../pack-scale.ts";
 import { hasLiveParts, liveKey, type PartBind } from "../live-parts.ts";
 import { binColors, binShape, householdCountry, mailboxShape, type BinShape, type MailboxShape } from "../household.ts";
@@ -91,6 +91,64 @@ const EDGE_GLOW = shade(0x37e0ff, 0.45);
 
 type Tf = (x: number, z: number) => Vec2;
 
+const meshEdgeCache = new WeakMap<PackMesh, Uint32Array>();
+/** Most outline segments drawn for one imported model. */
+const MAX_MESH_EDGES = 20000;
+
+/**
+ * The outline of a mesh: edges where its faces meet at a sharp angle (over 35°), and open borders – as pairs of vertex
+ * indices, found once per mesh. Vertices at the same place count as one (files split them along seams).
+ */
+export function meshEdges(m: PackMesh): Uint32Array {
+  const hit = meshEdgeCache.get(m);
+  if (hit) return hit;
+  const { v, i } = m;
+  const n = v.length / 3;
+  const same = new Map<string, number>();
+  const id = new Uint32Array(n);
+  for (let k = 0; k < n; k++) {
+    const key = `${Math.round(v[k * 3] * 65535)},${Math.round(v[k * 3 + 1] * 65535)},${Math.round(v[k * 3 + 2] * 65535)}`;
+    let j = same.get(key);
+    if (j === undefined) same.set(key, (j = k));
+    id[k] = j;
+  }
+  // per edge: its two ends, the first face's normal and how many faces share it
+  const seen = new Map<number, { a: number; b: number; nx: number; ny: number; nz: number; faces: number; sharp: boolean }>();
+  for (let t = 0; t + 2 < i.length; t += 3) {
+    const tri = [id[i[t]], id[i[t + 1]], id[i[t + 2]]];
+    const [p, q, r] = tri.map((x) => x * 3);
+    const ux = v[q] - v[p], uy = v[q + 1] - v[p + 1], uz = v[q + 2] - v[p + 2];
+    const wx = v[r] - v[p], wy = v[r + 1] - v[p + 1], wz = v[r + 2] - v[p + 2];
+    let nx = uy * wz - uz * wy, ny = uz * wx - ux * wz, nz = ux * wy - uy * wx;
+    const len = Math.hypot(nx, ny, nz);
+    if (len < 1e-14) continue;
+    nx /= len;
+    ny /= len;
+    nz /= len;
+    for (let e = 0; e < 3; e++) {
+      const a = tri[e];
+      const b = tri[(e + 1) % 3];
+      if (a === b) continue;
+      const key = Math.min(a, b) * 262144 + Math.max(a, b);
+      const old = seen.get(key);
+      if (!old) seen.set(key, { a, b, nx, ny, nz, faces: 1, sharp: false });
+      else {
+        old.faces++;
+        // the winding may differ between the two faces: compare the lines the normals lie on
+        if (Math.abs(old.nx * nx + old.ny * ny + old.nz * nz) < 0.82) old.sharp = true;
+      }
+    }
+  }
+  const out: number[] = [];
+  for (const e of seen.values()) {
+    if (e.faces !== 2 || e.sharp) out.push(e.a, e.b);
+    if (out.length >= MAX_MESH_EDGES * 2) break;
+  }
+  const edges = new Uint32Array(out);
+  meshEdgeCache.set(m, edges);
+  return edges;
+}
+
 class Builder {
   private readonly buf: GeoBuffer;
   private readonly lines: LineBuffer;
@@ -117,6 +175,54 @@ class Builder {
     const s = Math.sin(a);
     const tf = this.tf;
     return new Builder(this.buf, this.lines, (x, z) => tf(cx + (x - cx) * c - (z - cz) * s, cz + (x - cx) * s + (z - cz) * c));
+  }
+
+  /**
+   * A triangle mesh (fork: an imported model) in fractions of the box w × d × h standing at `y0`. Both sides of every
+   * triangle are drawn (an imported file's winding cannot be trusted), each shaded by how it faces a light from above.
+   */
+  mesh(m: PackMesh, w: number, d: number, h: number, y0: number, fallback: number): void {
+    const { v, i, c } = m;
+    const n = v.length / 3;
+    const pos = new Float32Array(n * 3);
+    for (let k = 0; k < n; k++) {
+      const [x, z] = this.tf(v[k * 3] * w, v[k * 3 + 2] * d);
+      pos[k * 3] = x;
+      pos[k * 3 + 1] = y0 + v[k * 3 + 1] * h;
+      pos[k * 3 + 2] = z;
+    }
+    const plain = new Color(fallback);
+    const front = new Color();
+    const back = new Color();
+    for (let t = 0; t + 2 < i.length; t += 3) {
+      const a = i[t] * 3;
+      const b = i[t + 1] * 3;
+      const e = i[t + 2] * 3;
+      const ux = pos[b] - pos[a], uy = pos[b + 1] - pos[a + 1], uz = pos[b + 2] - pos[a + 2];
+      const vx = pos[e] - pos[a], vy = pos[e + 1] - pos[a + 1], vz = pos[e + 2] - pos[a + 2];
+      const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      const len = Math.hypot(nx, ny, nz);
+      if (len < 1e-12) continue;
+      // light from above, a little from the front right
+      const lit = (nx * 0.35 + ny * 0.85 + nz * 0.4) / len;
+      if (c) plain.setRGB(((c[a] + c[b] + c[e]) / 3) / 255, ((c[a + 1] + c[b + 1] + c[e + 1]) / 3) / 255, ((c[a + 2] + c[b + 2] + c[e + 2]) / 3) / 255);
+      const kf = 0.5 + 0.5 * Math.max(0, lit);
+      const kb = 0.5 + 0.5 * Math.max(0, -lit);
+      front.setRGB(Math.min(1, plain.r * kf), Math.min(1, plain.g * kf), Math.min(1, plain.b * kf));
+      back.setRGB(Math.min(1, plain.r * kb), Math.min(1, plain.g * kb), Math.min(1, plain.b * kb));
+      const A = [pos[a], pos[a + 1], pos[a + 2]];
+      const B = [pos[b], pos[b + 1], pos[b + 2]];
+      const E = [pos[e], pos[e + 1], pos[e + 2]];
+      this.buf.tri(A, B, E, front);
+      this.buf.tri(A, E, B, back);
+    }
+    // its sharp edges and open borders glow like the outlines of the built-in furniture
+    const edges = meshEdges(m);
+    for (let k = 0; k < edges.length; k += 2) {
+      const a = edges[k] * 3;
+      const b = edges[k + 1] * 3;
+      this.lines.seg([pos[a], pos[a + 1], pos[a + 2]], [pos[b], pos[b + 1], pos[b + 2]], EDGE_FURN, ALWAYS);
+    }
   }
 
   /** Axis-aligned box in local coordinates; `edges` draws its outline. */
@@ -1980,6 +2086,8 @@ function packModel(
   skip: ((p: PackItem["parts"][number]) => boolean) | null = null,
 ): void {
   const onlyGlow = !!only;
+  // fork: an imported model's mesh, in its own colours or the body colour (a finish recolours it)
+  if (item.mesh && !only) b.mesh(item.mesh, w, d, h, base, item.mesh.c ? 0xffffff : (finish?.body ?? C.body));
   const advent = item.parts.some((p) => p.advent) ? adventCandles() : 4;
   for (const q of fitParts(item, w, d, h)) {
     if (skip?.(q)) continue;

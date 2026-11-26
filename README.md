@@ -23,6 +23,7 @@ This is a fork of [NeonPlan 3D by Mastershort](https://github.com/Mastershort/ne
 
 - **No account needed for the fun packs.** *Winter & Christmas* (fairy lights, snow, Christmas tree, Advent wreath, New Year's Eve firework), *Pets* (cats, dogs and rabbits walking through your house) and *Halloween* are always on. The "🎁 Free: winter and pets" sign-up popup no longer appears.
   Furniture that only comes from the shop's packs (such as a cat bed) is not included.
+- **Your own 3D models as furniture.** Import an `.obj` file (with its `.mtl` for colours) or a `.step`/`.stp`/`.iges` CAD file. It appears in the furniture library and can be placed, moved, turned and resized like any other piece. [How to use it](#-your-own-3d-models)
 - **Installs from this repository.** Updates come from the releases here, not from the original project.
 - Paid Pro add-ons and shop furniture packs are not part of this repository, just as in the original.
 
@@ -64,6 +65,19 @@ Copy `custom_components/neonplan3d` into `/config/custom_components/` on your Ho
 4. To put it on a dashboard, use **Add card** and search for "NeonPlan". For a single room, select it in the editor and use **🖥 Card for this room**.
 
 > The integration's domain is `neonplan3d`, the same as the original. Remove the original NeonPlan 3D before you install this fork.
+
+## 📦 Your own 3D models
+
+1. Open **Editor → Furniture**. At the bottom of the library, under **Your own 3D models**, click **Import 3D model**.
+2. Choose the file:
+   - **OBJ:** select the `.obj` and its `.mtl` together to keep the colours. Without the `.mtl` the model takes the furniture colour of the current look.
+   - **STEP / STP / IGES:** CAD files are converted in the browser with [OpenCascade](https://dev.opencascade.org/) (about 8 MB, loaded only while you import).
+3. Check the name, the category (where it appears in the library), the unit of the file and whether the Z axis points up. The size it will get is shown underneath.
+4. Click **Add to the library**. The model now appears in its category and is placed like any other piece of furniture.
+
+- Models with more than 50,000 triangles are simplified automatically.
+- The models are stored in Home Assistant (`.storage/neonplan3d.models`) and show on every dashboard.
+- To delete a model, use ✕ next to it in the same box. Furniture already placed with it becomes a plain box.
 
 ## 🧩 Dashboard card
 
