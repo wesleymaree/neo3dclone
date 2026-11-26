@@ -1,0 +1,15 @@
+{
+  "domain": "neonplan3d",
+  "name": "NeonPlan 3D",
+  "after_dependencies": ["bluetooth", "recorder"],
+  "codeowners": ["@wesleymaree"],
+  "config_flow": true,
+  "dependencies": ["frontend", "http", "panel_custom", "websocket_api"],
+  "documentation": "https://github.com/wesleymaree/neo3dclone",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/wesleymaree/neo3dclone/issues",
+  "requirements": [],
+  "single_config_entry": true,
+  "version": "4.0.3"
+}

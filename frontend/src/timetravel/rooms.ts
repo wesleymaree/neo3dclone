@@ -1,0 +1,96 @@
+// Time travel: which room each replayed entity belongs to – for the day summary per room and for the
+// names in the events sheet. Rooms come from Home Assistant's areas, the devices placed in the plan, linked
+// furniture and the windows' sensors.
+
+import { isLamp, pointInPolygon, zonesOf, type Building } from "../model.ts";
+import { entityAreaId } from "../devices.ts";
+import type { HomeAssistant } from "../types.ts";
+import type { HistorySpec } from "./types.ts";
+
+export interface RoomEntities {
+  floorId: string;
+  roomId: string;
+  name: string;
+  lights: string[];
+  /** The sensors of each window (open when one of them is). */
+  windows: string[][];
+  climates: string[];
+  temps: string[];
+  /** Every entity of the room. */
+  all: string[];
+}
+
+const domainOf = (id: string) => id.slice(0, id.indexOf("."));
+
+/** The area of an entity: its own, else its device's (or that device's parent's). */
+function areaOf(hass: HomeAssistant, id: string): string | null {
+  return entityAreaId(hass, id);
+}
+
+/** The switches that drive a lamp of the plan (a Shelly behind the ceiling light, a plug under the floor lamp): lights too (#1032). */
+export function lampSwitches(building: Building, spec: Pick<HistorySpec, "furniture">): Set<string> {
+  const links = new Map(spec.furniture);
+  const ids = building.floors.flatMap((f) => f.furniture.filter((m) => isLamp(m.type)).map((m) => links.get(m.id)?.entity));
+  return new Set(ids.filter((e): e is string => !!e && e.startsWith("switch.")));
+}
+
+/** The rooms of the plan with their lights, windows, climate devices and temperature sensors. */
+export function roomEntities(hass: HomeAssistant, building: Building, spec: Pick<HistorySpec, "openings" | "furniture">): RoomEntities[] {
+  const out: RoomEntities[] = [];
+  const byArea = new Map<string, string[]>();
+  for (const id of Object.keys(hass.entities ?? {})) {
+    const area = areaOf(hass, id);
+    if (area) byArea.set(area, [...(byArea.get(area) ?? []), id]);
+  }
+  const openings = new Map(spec.openings);
+  const furniture = new Map(spec.furniture);
+  const switches = lampSwitches(building, spec);
+  for (const floor of building.floors) {
+    // the rooms and the outdoor areas with an area of their own (a balcony with its sensor, #974)
+    for (const room of zonesOf(floor)) {
+      if (room.points.length < 3) continue;
+      const ids = new Set<string>(room.area_id ? (byArea.get(room.area_id) ?? []) : []);
+      for (const p of floor.placements) if (pointInPolygon([p.x, p.z], room.points)) ids.add(p.entity_id);
+      for (const f of floor.furniture) {
+        const l = furniture.get(f.id);
+        if (l?.entity && pointInPolygon([f.x, f.z], room.points)) ids.add(l.entity);
+      }
+      const windows: string[][] = [];
+      for (const o of floor.openings) {
+        if (o.room_id !== room.id) continue;
+        const l = openings.get(o.id);
+        const sensors = l ? [l.contact, l.tilt, l.contact2, l.tilt2].filter((x): x is string => !!x) : [];
+        for (const id of sensors) ids.add(id);
+        if (sensors.length && o.type !== "door" && o.type !== "garage") windows.push(sensors);
+      }
+      const all = [...ids].filter((id) => !!hass.states[id]);
+      const cls = (id: string) => hass.states[id]?.attributes.device_class;
+      out.push({
+        floorId: floor.id,
+        roomId: room.id,
+        name: room.name,
+        lights: all.filter((id) => domainOf(id) === "light" || switches.has(id)),
+        windows,
+        climates: all.filter((id) => domainOf(id) === "climate"),
+        // the room's own temperature when one is set (⚙ Room climate); else the temperature sensors of its area without
+        // the comfort indices some integrations add (dew point, frost point, humidex …, #1032)
+        temps: (() => {
+          const own = (room as { climate?: { temperature?: string | null } | null }).climate?.temperature;
+          if (own && hass.states[own]) return [own];
+          const index = /dew|frost|humidex|heat_?index|simmer|wind_?chill|apparent|feels|taupunkt|gef(ü|ue)hlt|perceived|comfort/i;
+          const name = (id: string) => `${id} ${String(hass.states[id]?.attributes.friendly_name ?? "")}`;
+          return all.filter((id) => domainOf(id) === "sensor" && cls(id) === "temperature" && !index.test(name(id)));
+        })(),
+        all,
+      });
+    }
+  }
+  return out;
+}
+
+/** The room of every entity (the first room that has it). */
+export function roomOf(rooms: readonly RoomEntities[]): Map<string, RoomEntities> {
+  const out = new Map<string, RoomEntities>();
+  for (const r of rooms) for (const id of r.all) if (!out.has(id)) out.set(id, r);
+  return out;
+}

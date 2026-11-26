@@ -1,0 +1,1537 @@
+# Changelog
+
+All notable changes to NeonPlan 3D. The full notes in German and English are on the
+[releases page](https://github.com/Mastershort/neonplan3d/releases). Ideas and votes:
+[Discussions → Ideas](https://github.com/Mastershort/neonplan3d/discussions/categories/ideas).
+
+## 4.0.3
+
+A fix round with one new switch: a garden around the house no longer takes the house's devices, picture frames keep their photos over a restart, dormers and snow stay out of the rooms, and a card can be set to only look.
+
+### New
+- **View only, for wall tablets:** a card with `view_only: true` (card editor: *View only*) shows everything but switches nothing – a touch cannot turn a lamp on or off by accident, the room panel shows its controls locked. Off by default; Home Assistant's own details dialog is not part of the card and stays as it is.
+- **A flight through the house says what it is looking at:** when a module flies from one open window or lamp to the next, each stop's words now stand in the picture with its number ("2 / 5") – in a large house the flight alone does not tell which window it is. The view also stands farther back and higher, so the room around a window shows which one it is, and in a shallow room it no longer looks at the back of the opposite wall.
+
+### Fixed
+- **Stairs from the stairs pack came 3.8 m tall** whatever the storey. Placed anew, they now reach exactly to the next floor, like the built-in stairs; stairs already in the plan keep the height they have (#1229, reported by skywalker0403).
+- **A card's start view for a screen held upright did nothing in a plan with one floor:** turning the tablet (or changing `start_view`) moved the camera only in the house view, and a plan with a single floor always shows that floor. It now applies there too, as long as no room is open (#1321, reported by bpaludo).
+- **A garden drawn around the whole house took the house's devices for its own:** its room panel listed lamps, thermostats and sensors of the rooms inside it, and its "everything off" would have switched them. A device now belongs to the innermost room or area it stands in; a room drawn inside another keeps its devices to itself in the same way (#1332).
+- **A digital picture frame lost its uploaded photos at the next restart of Home Assistant:** the frame stayed grey. Stored photos of a frame were not counted as used and were cleared away at start. They stay now; photos already lost have to be uploaded once more (#1327).
+- **An interior wall jumped by half its thickness at a junction** when it ran on in line with an outer wall: only its first stretch stood flush with the outer wall, the next one in the middle again – a corner that is not there, plain to see where the rooms beside it are open to each other. The whole run now stands on the same side (#1326).
+- **A dormer's side walls hung over the bed as slanting triangles** in the floor and room view, where the slope around them is gone. They now show there only where they stand on the floor like walls (a bay); a dormer high up on the slope keeps its window, and its cheeks come back with the roof (#1315).
+- **Snow on the roof showed inside the rooms under a dormer** as slanting white planes: it lay on the whole slope, also under the dormer, and on the part of the dormer's roof that runs on inside the main roof. No snow lies any more where another roof face is above the spot (#1324).
+- **A heating valve was taken for a window sensor:** a window without a sensor of its own takes a contact of its room's area by itself, and a valve or actuator that reports "opening" was one of them – the window stood open in 3D whenever the room heated, and the window watch warned of heating with a window open in a house without a single window sensor. Valves and actuators are left out of that; chosen by hand they still work (#1339).
+
+## 4.0.2
+
+Another fix round: dormers no longer stand in the room below, a garage roof stops at the house wall, the surroundings from the map lie on solid ground, and a card can have its own start view for a screen held upright.
+
+### New
+- **A start view for a screen held upright:** a card may have a second start view, `start_view_portrait`, beside `start_view`. Turning the tablet moves the house view to the one that fits; without the line nothing changes (idea and proposal: bpaludo, #1228).
+
+### Fixed
+- **A camera's view cone over a small step in the ground** – a terrace a few centimetres above the lawn, a path beside a bed – showed a jagged pale strip along that edge: the cone ran slanting through the step. It is now cut along the edge and lies flat on each side (#1115, reported by RobertSorgenfrei).
+- **A low roof beside a higher storey ran on through the house** – a garage's roof next to the upper floor, say: as soon as its width lay within the length of the roof above, it was taken for a wing of that roof, drawn on to its ridge line and lost its overhang. A roof whose ridge stays below the other roof's eave now ends at the wall under it (#1280, reported by TRusselo).
+- **A hedge, fence or pergola lifted by a height offset** grew into a solid block down to the ground since 4.0.1. Lifted by hand it keeps its underside where it was put; only standing on the ground it reaches into a falling lawn (#1303, reported by murilokasper).
+- **A door in a free wall along the house's outside** swung and hung the other way round in the plan than in 3D when the wall was drawn with the rooms on its right: 3D takes the side with the rooms as inside, the plan took the side as drawn. The plan (and the camera spot of the lock) now agree with 3D (#1225, reported by Atomiiik).
+- **A wall painted dark blue turned grey** in the homely styles, or grey in a band where it is shaded (`#254369`, say): a rule that turns dark navy leftovers of the neon look neutral took the wall's own colour for one. Walls are left out of it (#1306, reported by AxelBlomTH).
+- **A thin line across the whole 3D picture** under the real sky, most visible at night: the sky above the horizon and the haze below it are two fills, and where they met between two pixels the background showed through. They now meet on a whole pixel (#1305, reported by murilokasper).
+- **A towel radiator from the bath pack** glowed only as a narrow strip on its top with a "state from" entity, and not at all on a switch alone. It now glows warm on the wall behind it, all over – with either (#1311, reported by milandrzej). Other flat pack items on the wall glow behind them too instead of on their top edge.
+- **Full screen on a phone:** a card in the phone view has no full-screen button, but while the page loaded it showed for a moment – tapped then, there was no way back. In full screen the button now stays there too (#1261, reported by 1970lexi).
+- **A robot vacuum with maps of several floors** drove its lanes on its dock's floor while it cleaned on another one. It now cleans on the floor of the room it reports – unless that floor has a dock of its own for the same vacuum (idea and proposal: akobza, #1132).
+- **A robot vacuum in a U- or L-shaped room** drove straight through the wall to its first lane when 3D opened while it cleaned. It now appears at the lane, as a robot reported in another room does (idea and proposal: bscholer, #1210).
+- **A dormer's side walls stood in the room below** as dark slabs, through the bed, when the dormer is wider or deeper than the room's bay under it: they were built from the roof's base up. They now stand on the slope, as on a real house (#1315, reported by Atomiiik).
+- **A room listed the power of another room's lamp** – the bathroom lamp's meter in the office and the hallways: with several lamps on one device (an actuator with many channels) and PowerCalc meters named after the lamps' names, every lamp drawn as furniture took the device's first meter. Each lamp now takes the meter that carries its name, and none when it has none of its own (#743, reported by daene85).
+- **A long press on an add-on's marker** (the heat pump's status, say) opened Home Assistant's details for `module:…`, an entity that does not exist. It now does what a tap does (#1314, reported by Atomiiik).
+- **The sky showed through the ground of the surroundings** in the homely styles, wherever the map knows no area between streets and lawns – blue by day, pink in the evening. A plain ground now lies under the whole map; it leaves out what the plan draws below the ground (a pool, a lowered drive, the floors below). The neon looks keep their grid (#1320, reported by MarkTu75).
+- **Slovak:** 25 texts corrected – grammar, typing errors and the informal address throughout (Bearstorm, #1100).
+- **A terraced house and the surroundings from the map:** the map often keeps the whole row as one building, which NeonPlan hides as your own house – so the row was missing, and shown by hand (⚙ Settings → Surroundings → Show and hide houses) it stood as a block through the house. Shown by hand, it now leaves out what the plan builds there: the neighbours' houses stand to the left and right of yours. Nothing changes unless you tap it.
+
+## 4.0.1
+
+A fix round after 4.0: the phone's list no longer calls a closed garage door open, a second plan stops flooding the log, and thin things on the wall are as thin as the plan says.
+
+### Fixed
+- **A closed garage door counted as open** in the phone's list "What is going on?" – its reading says how far the door is *down*, and it was read the other way round, so every closed garage door stood in the list and an open one did not (#1261, #1276, reported by Atomiiik, beta-j, Skeletitor and murilokasper).
+- **A view of a second plan flooded the Home Assistant log**: the view tells which plan it shows, the subscription did not know that field and turned it away ("invalid_format" at `view.plan`) – thousands of lines a day, and no announcements or voice answers on that screen (#1242, reported by Habi01H).
+- **Socket, light switch and sensors on the wall stood 5 cm out of it** in 3D while the plan and the selection showed them thin: models are no longer widened to 5 cm, so a socket is its 1.4 cm and a sensor can be made thinner by hand (#1236, reported by daene85).
+- **The content of a standing digital frame sat on its back**, beside the strut, instead of on the front (#1264, reported by blitzwurst) – in the pack "Digitale Bilderrahmen".
+- **A hedge, fence or pergola on falling ground** showed its underside: the block now reaches down into the lawn below it (#1262, reported by erwinsnl).
+- **Cupboard fronts stayed dark blue under a zoom style** while the house around them was already homely: doors and drawers that open are drawn outside the look's shader, and they now take the near look (#1259, reported by daene85).
+- **The house's shadow was missing on a dashboard card with a heatmap** – the shadow lies outside on the ground, so coloured floors leave it alone (#1196, reported by netrunnercs and michaelbell1981).
+- **A finger on a label, a pin or a glass card turns the house** like a finger on free picture. Such a drag belonged to nobody, and on an Android phone the browser took a sideways move for its "back" swipe: the dashboard came up instead (#1248, reported by RiotEd).
+- **The mouse turns and zooms over markers too**: the wheel over a pin, a room name or a glass card zooms the house, and a drag that begins there turns it, instead of getting stuck wherever the pointer happened to rest (#1271, reported by snurre0).
+- **The way out of full screen stays**: the ✕ no longer disappears with the card's other buttons, so a card in full screen cannot trap you (#1261, reported by 1970lexi).
+- **The plan list says why the main plan has no bin** instead of leaving the row empty (#1258, reported by K3ngur).
+
+## 4.0.0
+
+NeonPlan on the phone: a view made for the thumb, with a bar at the bottom, a list of what needs a look, and a card editor of its own for phones.
+
+### New (free)
+- **Phone view:** the house without header and loose buttons, and a bar at the bottom – **Now** (what needs a look, with a green, yellow or red dot), the **rooms** by floor as tiles with temperature, lights, open windows and music, the **blinds** of the house, and **More** (search, house check, whole house, room on its own). A phone is asked once whether to try it; on any device it is switched on under ⚙ → Phone view. The choice is kept per device, tablets and PCs stay as they are.
+- **"What is going on?":** warnings, open windows and doors, unlocked doors, who is at home, the household, lights on, cars and energy – the urgent first, "All is well" when nothing needs a look. A tap on a line shows the place in the house; "All off" and "Lock" stand beside their lines.
+- **House check:** before leaving or going to bed NeonPlan steps through every open window, unlocked door and lit room, each shown in the house.
+- **The room panel on a phone** opens folded (name, temperature, its buttons), so the room stays in sight; "Show devices" unfolds it.
+- **Phone view in the dashboard card:** `phone: true`. The card form asks what the card is for – a tablet / large screen or a phone – and shows the options that fit.
+- **Design the bar yourself:** leave the rooms, the blinds or the favourites out (`phone_hide`), open with the list (`phone_start: now`), a room on its own (`phone_solo`), and up to two **places of your own** (`phone_places`): all lamps or all thermostats by floor, a scene or script, or a page of a dashboard.
+- **From a notification straight to the place:** `/neonplan3d?view=now`, `?room=…` and `?show=<entity>` open NeonPlan at the list, a room or a device.
+- **Card option `surroundings: false`:** this card draws the house without the surroundings from the map.
+- **Card templates as a management page:** the templates on the left by screens and phones, the form in tabs, the preview on the right – on a phone for a phone template. The preview turns, zooms and opens rooms like the card and switches nothing.
+- **⚙ Settings tidied up:** one dialog instead of a list of sixteen entries – the topics in five groups on the left (house & plan, look, screens, extensions, system), the chosen topic on the right. Every topic's content is unchanged.
+
+### Fixed
+- **Restoring a full backup with many packs** failed ("not a plan"): a backup too large for one message is now restored in pieces, the plans first and every pack on its own; a dropped connection is named as such (#1213).
+- **Furniture and stairs from packs disappearing** from the view: when loading the packs failed once, the library stayed empty and was never asked for again. The loaded packs now stay, and loading is retried (#1229).
+- **An LED strip without a height of its own** hangs under its room's ceiling instead of the floor's default height (#1226, thanks ManuelHecht).
+- **"Rooms overlap"** names the rooms and selects the first one (#1195).
+- **A tap on a blind on an Android phone** could still move it: a quick menu that has just opened takes no touch for a moment (#1208).
+- **Surroundings from the map with a radius of 150 m or more** could fail to save ("value must be at most 60 … ways … w"): a way mapped wider than 60 m – a broad river, or a width entered in centimetres – is now kept at 60 m (#1234).
+
+## 3.5.2
+
+### New (free)
+- **Neighbours' houses with a gable roof (option):** ⚙ Settings → Surroundings → **Neighbours' houses with a gable roof** gives the houses from the map a simple roof with the ridge along their longer side instead of a flat top; halls, blocks of flats and winding buildings stay blocks. Off by default (idea: frops83, #1109).
+
+### Fixed
+- **Duplicate floor** failed to save when a piece of furniture on the floor had "Only show while …" set ("expected str at … show_if.entity"): a copy without links to Home Assistant kept the condition with an empty entity. The condition, a screen picture or a pop-up trigger now goes with its entity – in a shared template too; plans that already hold such an empty condition are healed when loaded (#1217, thanks Sepp70).
+- **A tap on a blind on a phone** could move it instead of opening its menu: a tap with a shaky finger counted as a swipe. A swipe on a blind or a lamp now moves nothing within its first 18 pixels, and let go there it is a tap (#1208, thanks Atomiiik).
+- **House shadow on a dashboard card** of a house with one floor: the card always shows that floor, and the shadow was only drawn for "all floors" (#1196, thanks michaelbell1981).
+- **A roof that begins at a floor's own level** (wall top = the floor's height above ground, no knee wall) sits on that floor: on the floor below, the roof drew gables of its own in front of the attic's outer walls, windows and doors (#1199, thanks maecius2).
+- **Camera view cones at a step:** a cone ending at an edge (a terrace above the drive) ended on the first spot below it and hung down the step as a curtain along the whole edge – it now ends on the upper ground. A camera standing right at such an edge and looking out lays its cone flat on the ground below (#1167, #1115, thanks 1970lexi and RobertSorgenfrei).
+- **Zooming with two fingers in the house view:** fingers on a floor's label, a pin or a glass card count for zooming and panning too – they never reached the picture, so on a phone or a small tablet the house could often be turned but not zoomed. What lies under a finger that zoomed is not tapped.
+- **Glass cards all over the picture** after a module's card went away (the speaker's after an announcement): the cards wait hidden until the next frame places the ones in view.
+- **Editor dialogs** no longer close when you mark a text with the mouse and let go outside the dialog.
+- **A smart plug with a power sensor** on a piece of furniture: the watts decide whether it glows and counts as running, as "Running from (watts)" says – by the plug alone it glowed on standby all day. Without a power sensor nothing changes.
+
+## 3.5.1
+
+### Fixed
+- **Fly in from space** can be switched on in the editor too: **Settings → Weather & warnings**, right below **Real sky** – it was only in the ⚙ menu of the 3D view (☆ → ⚙ Settings), where nobody found it (#1193, thanks PetrMa).
+- **Real sky with the surroundings from the map:** the horizon lies beyond the map's far edge, so sun, moon and clouds stand over the neighbourhood instead of between its streets and under its roads (#1203, thanks twynne and daene85).
+- **Sun arc and house shadow gone after the update:** when NeonPlan switched a slow device to the tablet level by itself in the first seconds, dropping the old graphics on purpose counted as lost graphics, and the safety net switched sun arc, house shadow and window glow off for the whole version (#1196, thanks netrunnercs). With 3.5.1 they come back.
+- **Ceiling lamps from packs** hang 5 mm under the ceiling: flush with it, a basement lamp's top lay in the floor above, shimmered through it and could be switched from there (#1191, thanks daene85).
+- **Turned outer walls** turn to glass at their own angle: walls were grouped in eight directions, so a wall up to 22.5° off its group stayed solid while it faced the camera, or turned to glass too early (#1189, thanks ManuelHecht).
+- **Dormers:** a dormer belongs to the floor of the roof it sits on – one with its front reaching down lower stood as a box over the floor below in that floor's view; in a floor view the dormer's walls only stay over an attic, not over a floor with its own ceiling (#1167, thanks 1970lexi).
+- **Camera view cones** of a camera right at a step (a terrace edge) no longer run down it in their first half metre; for a camera on an outer wall the step is measured from the ground in front of the wall (#1167).
+- **Swiping a blind in the 3D view** sends one position when the finger lifts instead of a new one every third of a second – a blind motor cannot follow, queued every step and kept moving for a long while. A pan that only started on a blind sends nothing; lamps still follow the finger.
+- **Wallbox status:** read by whole words – "not_charging", "ready_to_charge" and "charger_free" no longer show as charging, "disconnected" and "unplugged" no longer as plugged in.
+- **Live Presence:** the room sensors keep the room in Home Assistant's history, no longer every new probability and "last seen" time.
+
+## 3.5.0
+
+### New (free)
+- **Real sky:** behind the house a sky that follows the real sun – sunset colours, the blue hour, stars that move through the night and the moon in its real phase; with Weather outside, clouds drift with the real weather. On by default, off in ⚙ Settings; a still picture on the tablet level.
+- **Fly in from space (option):** when the view opens, a neon globe turns to your home, a beam marks it and the camera comes down onto the house. Off by default; a tap skips it.
+
+### New in the Pro add-ons (free updates for their owners)
+- **Kamera-Cockpit – People from cameras:** a person, car or animal a camera sees stands as a figure on the plot; with Frigate right where it is and moving along.
+- **Klang & Kino – Music follows you:** the music walks with you from room to room (Music Assistant); notes fly between the speakers.
+- **Haushalt Pro – Clean right here:** tap a spot in the 3D view and the robot vacuum cleans exactly there (Roborock, Dreame, Xiaomi).
+
+### Fixed
+- **Dormers:** in the house view a dormer's walls lift and fade with the roof again – a box stood in the room below while the roof was lifted (#1167, thanks 1970lexi).
+- **Dashboard card:** the walk button steps aside for a dashboard button with a long label (#1146, thanks Deninho91).
+- **Camera view cones** end where the ground drops away (more than 40 cm, a terrace above the drive) instead of running down the step (#1167).
+- **Energy Pro:** PV comes from the strings when the inverter's sensor reads nothing or 0 while its strings deliver power (a Deye via Solarman showed 0 W beside glowing fields); the plant card and today's yield follow. The editor says which sensor belongs to the inverter: the modules' PV power, not its output power.
+- **Room panel:** on Home Assistant 2026.11 an entity you renamed shows its own name again, without the device name in front of it ("switch_living_a Ceiling light" → "Ceiling light") (#1181, thanks bpaludo).
+- **Style from a helper:** a dashboard card with `style_entity` switches the style as soon as the helper changes, not only at the next change of another device (#1170, thanks bpaludo).
+- **Own buttons with "navigate":** they open the page the way Home Assistant does, so ← in a subview leads back to the plan instead of the dashboard's first view (#1171, thanks bpaludo).
+- **Editor:** with Space held, dragging with the mouse always pans the plan and never moves the room or furniture under the pointer (#1179, thanks chrisns).
+- **Floors pulled apart:** the roof lifts clear of the floor it covers – a loft inside the roof shows its walls under the roof instead of being swallowed by it (#1169, thanks chrisns).
+- **Walls beside windows and doors:** the vertical strips from the floor to the top beside every opening are gone in the see-through walls – only the reveal between sill and lintel is drawn, with fewer triangles than before (#1182, thanks ManuelHecht).
+- **Mansard roof:** the pitch of the upper roof can be set in the roof section (Upper roof pitch, 5–60°); without a value it stays 30° as before (#1183, thanks Vatout57).
+- **Roof sections in one plane:** where two sections continue the same roof face (an L-shaped or stepped lean-to built from pieces), the joint no longer shows an edge, a line or a wall underneath (#1184, thanks ManuelHecht).
+- **Dormer fronts:** a window or door in the floor wall below a dormer's front shows through again – the dormer's front only starts above that wall instead of covering it (#1185, thanks Atomiiik).
+- **Furniture colours (homely styles):** carcass and fronts can be coloured separately – a new **Carcass** colour next to Fronts (until you pick one, the front colour still colours both, as before). Lamps from packs take their body colour, worktops take the wood colour, and a blue front no longer turns grey on some faces (#1175, #1177, thanks daene85). With the pack updates: the gaming chair's red parts, the extendable dining tables' top and the track spots follow their colour, the standing mirror's stand sits behind the glass (packs need 3.5.0).
+- **Install and update help** names the Home Assistant **Marketplace** (Settings → Marketplace), which took over from HACS in Home Assistant 2026.11; HACS stays described for older versions. Hints in the app point to Settings → System → Updates.
+
+## 3.4.3
+
+### Fixed
+- **Klang & Kino:** the now-playing glass card shows in an opened room too – before, a setting of Energy Pro hid every card there, and without Energy Pro it could not be switched on; a speaker's symbol steps aside for its card only while the card can show, so the symbol no longer vanishes with no card in its place (thanks to a report by e-mail, #911).
+
+## 3.4.2
+
+### New
+- **Height of the surroundings:** Editor → Surroundings moves the whole map up or down, for a street that lies higher or lower than the ground floor – a slope, a sloping drive (#1148, thanks daene85 and 1970lexi). Default 0, as before.
+
+### Fixed
+- **Dormers:** a window under a dormer front shows completely – a floor's wall under a dormer rises to where the dormer's front begins (#1156, thanks Sharkelli); the roof opens exactly at the dormer's edge and a wall meeting a dormer steps up straight instead of slanting over 30 cm (#1145, thanks grzegorz914).
+- **Turned flat and parapet roofs:** fairy lights, solar fields and roof windows turn with the roof (#1147, thanks AbortRetry).
+- **Roof windows on a flat roof** show their glass and look into the room below (#1078, thanks michaelbell1981).
+- **An opening at a wall's end** leaves nothing standing in the passage – no thin plate, no lines (#1158, thanks ManuelHecht for the precise analysis); a door across a transition no longer leaves a plate in its doorway (#624).
+- **Shared walls left out ("no wall")** show as left out in both rooms and come back from either; "no wall" on a short stretch no longer takes away the neighbour's whole wall (#1151, thanks vincegre).
+- **Live parts** of pack furniture (a dishwasher's door, drawers, status lights) follow their sensor right away instead of keeping the state from loading (#1143, thanks frops83); a wood finish colours the whole worktop of kitchen units, dishwashers and vanities, not only its front edge.
+- **Camera view cones** lie on a terrace that is higher than the lawn instead of running under it (#1115, thanks RobertSorgenfrei).
+- **Cards of single rooms** keep the roof sections over the floors they show – the attic slopes and roof windows of an upper floor (#997, thanks RkcCorian).
+- **Turning a floor or the whole house** turns its floor-plan picture about its middle, so it stays under the rooms (#1124, thanks RkcCorian).
+- **Time travel → Overview → Day** counts switches that drive a lamp of the plan as light (#1032, thanks abgestumpft).
+
+## 3.4.1
+
+### Security
+- **"People to admins only" now holds on the server:** other users get no person's whereabouts from questions ("Who is home?", "Where is …?") and their views no longer receive the rooms to fly to (#1129, thanks mariomurrent-softwaresolutions).
+- **Ringing a phone:** only for its own person or an admin, sent with the caller's context, at most once in 30 seconds (#1130).
+- **Time travel history:** returns only entities the user may read; statistics that belong to no entity only to admins (#1131).
+
+### Fixed
+- **Energy Pro glass cards** are readable in the bright styles (Day, Homely, Architect's model, Pastel, Wood & paper): they get the darker glass of the module cards (#1126, thanks abgestumpft).
+- **Window light at night** shows outside the house in desktop Chrome with a homely style (#1114, thanks moilolon); **camera view cones** no longer burn a light terrace to white in the homely styles (#1115).
+- **Surroundings from the map:** streams, roads and fields reaching far beyond the chosen radius are cut at the neighbourhood (#1121, thanks Habi01H).
+- **Turning the whole house by 90°** turns the roof sections with it – ridges, roof windows and solar fields stay on their roofs (#1124, thanks RkcCorian).
+- **Located people** stand inside their room: in an L-shaped room the figure stood at the room's middle, which can lie in the hall next to it, while the answer named the room (#900, thanks cesp99-ux); a radar zone reaching through a wall no longer places someone outside their room.
+- **Dormers:** their side walls and front gable stay when the roof fades over the attic (floor view) – the room no longer has open holes in its sides (thanks to a report on Facebook).
+- **Old wall tablets and old Safari:** the 3D view no longer stops at the contact shadows where the browser has no `roundRect`; time travel no longer floods the error reports while it replays.
+
+## 3.4.0
+
+### Added
+- **The shop's furniture in the library:** the items of packs you don't have yet stand after your own with a lock – the search finds them too; a tap shows the picture large with the pack, its price and the way to the shop. Pictures only, loaded from the shop at most once a day when the library opens; a chip hides them.
+- **Finishes:** own colours for wood, fabric and fronts of every item in the homely styles – built-in and pack furniture – as swatches in the furniture form, also for all the same items in the plan at once.
+- **Live parts of pack items:** parts move or light with an entity – doors and flaps open, drawers slide out, prints grow with their progress, tanks and batteries fill, status lights show green, off or a pulsing red, fans turn, parts glow. An entity per part in the furniture form; without one everything stands as drawn. First packs with live parts: the new "Homelab & Workshop" pack; every cabinet, wardrobe and kitchen unit of the room packs opens its doors with a door contact (drawers slide out, oven and dishwasher doors fold down, fridge and freezer doors open apart), also in the free kitchen and bedroom taster packs; the server rack, 3D printers, NAS, heat pumps, boiler, tanks, batteries and network gear of Office & Gaming, Smart Home & Tech and Utility & Building Services live too. An item's own entity only stands in for a part of a fitting kind (an oven's power switch does not open its door).
+- **Smaller main bundle:** the texts only the editor needs come with the editor – every wall tablet and card loads about 160 KB less.
+- **Extensions page:** the Pro add-ons that fit your home (cameras, a solar or grid sensor, media players, a wallbox, weather, waste collection – checked in the browser only) come first with a small sign; locked add-ons show their price with a shop connection; without a key the page says what a free customer account brings.
+
+### Fixed
+- **The picture frames' card on the extensions page** showed raw text keys instead of its name and description.
+- **A neighbour's house stayed hidden** after moving the map by hand: when the location set in Home Assistant lies on no house of the map, NeonPlan takes the nearest house within 30 m for yours and lays the plan onto it. Moving or turning the map now makes the map's house under the plan your house – the neighbour shows again, and Align again keeps to it (#1110, thanks RkcCorian).
+
+## 3.3.1
+
+### Added
+- **A colour for a single wall:** a wall drawn on its own has 🎨 Colour in its form – both sides, shown in the homely styles, like a room's wall colours. A half-height wall in the bathroom no longer takes the colour of the room wall behind it, and the walls of a carport or a shed outside the rooms no longer stay white (#1101, thanks frops83).
+
+### Fixed
+- **Map buildings over the carport and the shed:** buildings of the map standing for the most part on what the plan draws itself are hidden – rooms on every floor (a floor of its own for the garden too), roof sections such as a carport or a garden house, and pergolas; before, only the ground floor's rooms counted. The plan shows the map on every floor at the ground floor's level (#1099, thanks frops83).
+- **Cameras outside the rooms could not be tapped** with "Switch devices only in the opened room": a device that lies in no room has no room to open – on its own floor a tap now acts on it, in the All floors view it opens its floor. A device in an outdoor area acting as a room opens that area (#1103, thanks frops83).
+- **Heatmap colours were gone after switching dashboard views** and coming back; the legend stayed. The room tint goes to the new 3D view again (#1105, thanks moilolon).
+- **A white ground under an own homely style based on Neon** at quality High: switching the quality showed the neon grid again without its texture. It follows the same rule as when the house is built (#1106, thanks moilolon).
+- **Split-level houses:** a roof section sits on the floor under it, not on the highest floor beside it at another level – in the 3D view (walls and gables under the roof) and in the editor's choice of floor (#1097, thanks abgestumpft).
+
+## 3.3.0
+
+### Added
+- **The surroundings from the map:** ⚙ Settings → 🗺 Surroundings brings in the neighbourhood from OpenStreetMap – the neighbours' houses as blocks at their height, streets, paths, railways, water, parks, woods and single trees, worldwide. NeonPlan finds your house on the map, lays the map under your plan and turns north to match, so the sun's path and the shadows are right; the neighbours' houses cast their shadows into your garden. The location set in Home Assistant is sent once to the public Overpass service; the neighbourhood then stays in the plan. Turn and move the map by hand when needed. Map buildings standing on your rooms (an attached garage mapped on its own, say) are hidden; tap houses on a small map to hide or show them, and show the neighbours' houses as flat outlines instead of blocks if you like. A new house can start from the map: on an empty ground floor the house's outline is the template, turned square with north already set – draw the walls on it (its corners snap) or lay the floor-plan picture onto it with “Align to the map” (two corners in the picture, the same two on the map). Map data © OpenStreetMap contributors (ODbL).
+- **Pack fans turn:** parts of a pack model marked to spin turn about their middle while the item's fan runs – at its speed, a switch at a medium pace; a pack lamp with fan blades takes a fan entity and gets its pin like the built-in one (#1084, thanks moeva777). A part field of a newer pack now asks for an update instead of being refused as invalid.
+
+### Changed
+- **The gift for everyone is now winter and pets:** the hint offers the free fun packs Winter & Christmas and Pets instead of Halloween, which is over. It shows once again, also for who dismissed the Halloween one.
+- **A new demo house** in the online demo: an L of a main house with a studio under the roof and a lower living wing with its own gable – dormers, a bay window, a balcony, a roof terrace, a carport, a terrace, a pool and a garden.
+
+### Fixed
+- **Garage doors had a roller shutter in front of them:** every garage door also got the shutter and shutter box of a window, hiding the door behind it. A garage door is now only the door – sectional or up-and-over (#1094, thanks chRyX-giT).
+
+## 3.2.0
+
+### Added
+- **The house turns homely as you zoom in:** a second style below the style choice – **When zooming in** – the house flows into as you come closer: neon from afar, for example homely close up in a room, without reloading. **early … late** sets when it begins, **Only the room** turns just the room you zoom into or tap and keeps the rest of the house in its look. It works while Neon, Blueprint or Day is chosen; dashboard cards have it in their dialog (YAML: `zoom_style`, `zoom_late`, `zoom_scope`). Nothing changes until a zoom style is chosen.
+- **Today's calendar entries in "Today in the household"** (Household Pro): tick calendars under ⚙ Settings → House; all-day entries first, then by time, ended ones drop off, one starting within the hour glows amber (thanks T-Eberle for the idea in their fork).
+- **Room names where you want them:** the selected room's name has a handle in the plan – drag it where it covers no other name, in the plan and in 3D; a double tap puts it back. ⚙ Settings → House sets the size of the room names in 3D (50–200 %), and **Names** next to Effects hides them in the editor's 3D pane (thanks Banhammer1919 for the idea in their fork, and a user for the wish).
+- **Up-and-over garage door:** a garage door's **Kind of door** – sectional as before, or one leaf that swings out and up and lies under the ceiling with a part sticking out like a canopy (thanks ProvUK for the idea in their fork).
+- **Neon sign:** an own text (one or two lines) in glowing tubes on a dark plate on the wall, under Decoration. It glows with its light or switch – in the light's colour when it shows colours – or always when nothing is linked (thanks ProvUK for the idea).
+
+### Changed
+- **Every language** has the texts of several plans and room cards; they were in English until now.
+
+### Fixed
+- **Window panes turned opaque in the homely styles** after a floor was opened and the view went back to all floors: the floors that had faded out came back with solid glass. The glass keeps its light tint now (#1081, thanks abgestumpft).
+- **Roof windows on a flat roof stood tilted like solar modules:** they lie flush in the roof now, like a rooflight (#1078, thanks michaelbell1981).
+- **Own styles were missing in the card dialog on a dashboard:** the card editor fetched the plan but took the own styles only from a plan handed over by NeonPlan's editor. It now offers them everywhere (#1077, thanks RobertSorgenfrei).
+- **Hologram cards over the roof were cut off at the top:** cards move in from the sides and, where there is no room above, hang below their anchor – inside the view and clear of the energy tiles (#1088, thanks abgestumpft).
+
+## 3.1.2
+
+### Fixed
+- **Window panes were pure white in the homely styles,** from outside and from inside, with the light on or off: the glass added its colour to what lies behind it, which on light walls and the sky always summed up to white. In the styles with real materials the glass is now a light tint over what lies behind – you see through it again – and it darkens with the house in the evening. Neon and the drawn styles are unchanged (#1070, thanks abgestumpft).
+- **Running devices glared white in the homely styles:** the display of a heating radiator, a TV, a coffee machine or a running washer was added to its light body and turned white; in the evening styles it stayed at full brightness while the house dimmed. It now covers the body in its own colour, a little softer, and dims in the evening – less than the house, so a running device still shows (#1071, thanks abgestumpft).
+- **Lit lamps were darker than the walls they light** in the homely styles: a lit shade was shaded and dimmed like a beige lampshade. Lit shades now shine unshaded and keep their brightness in the evening (#1071).
+- **An L-shaped stair from the stairs pack cut a hole where no stair is:** stairs from a pack opened their whole box in the floor above, for an L-stair also the empty corner beside its first flight. They now open the floor only where their treads, landings and flights stand, mirrored and turned as placed (#1073, thanks bwynants).
+- **Two equal roofs crossing at a hipped end:** a cross gable as wide and as high as the roof it sits on, flush with its hipped end, was cut into it like a small dormer – parts of both roofs stood where they should meet in a valley. Such a gable now meets its roof like a wing: each keeps what shows above the other, the valley runs cleanly up to the ridge. Smaller dormers are unchanged (#970, thanks luisrocejo).
+
+## 3.1.1
+
+### Added
+- **Turkish** as the twentieth language (thanks ethemcemozkan for the texts, #884).
+- **Venetian blinds show their slats:** a blind whose cover reports a slat tilt (a Raffstore) is drawn as single slats that turn with it – level when open, like the roller shutter when shut – and they glide like the blind runs. The sunlight in the room and the window light outside follow them: a lowered blind with open slats lets light through. A window gets **Invert slats (0 = open)** for integrations that report the tilt the other way round; it turns the value in 3D, in the quick menu and the room panel, and the value sent (thanks danymue for the idea and the groundwork, #971 and #999).
+- **A new corner on an outdoor area's edge:** the **+** in the middle of an edge of a selected lawn, terrace or fence puts a corner there and takes it along with the pointer, as with a room; a fence's gates keep their place (thanks wilds for the idea, #1029).
+- **Blinds inside the room:** a window's or door's blind can hang inside as a roller shade – **Blind sits: inside (roller shade)** in its form. The cassette sits on the room's side above the window, the cloth runs down in the room. Outside stays the default, existing plans do not change (thanks TRusselo for the idea, #904).
+- **"more" on a module's glass card:** on a narrow dashboard card or the tablet level a card such as the heat pump's leaves its minor values out (starts, run time, the 24-hour curve); a small **more** under it shows them on this device, **less** hides them again. Nothing changes until it is tapped (#1016, thanks Deninho91).
+
+### Changed
+- **Slovak** reads far more naturally: 745 texts reworked by a native speaker (thanks Bearstorm, #924).
+
+### Fixed
+- **Located people vanished when Home Assistant did not say "home":** a person standing in a zone of their own at the house (a "Garden" or "Workshop" zone) is at home and gets their figure; and what is heard at home of someone who is away (a phone left behind, a watch on its charger) stands there as a point with its name instead of disappearing – the plan showed nothing at all, while "Who is home?" still named the room (#900, #1049, thanks cesp99-ux and gshafer).
+- **A top-floor wall cut to a lower roof:** a wall whose outer face lay a few millimetres outside its own roof section was ended under a lower roof that happened to cover that strip (a garage roof whose ridge reaches above the floor) – half a wall inside, see-through from outside. It now ends under its own roof's edge (#1051, thanks TRusselo).
+- **"Switch devices only in the opened room" let other rooms' devices switch:** with a room opened – above all the garden – a tap or swipe on a blind of another room moved it. A device that is not in the opened room now opens its own room instead (#896, thanks RobertSorgenfrei).
+- **Lamp light washed coloured walls out to white in the homely styles:** the light was added on top of the wall's colour; with real materials it now lights the surface – a blue wall stays blue and gets brighter, a wooden floor warmer. Neon and the drawn styles are unchanged (#1054, thanks abgestumpft).
+- **The online demo showed parts of an add-on that is not out yet** (a pool's pump, sand filter, valves and pipes); they are gone from the public demo (#1063, thanks daene85).
+- **Looking through a camera (Camera Cockpit) showed a narrow slice:** the 3D view kept its own field of view, 38° up and down, so a wall camera's 90° looked like a zoomed view from eye level. The view now takes the camera's field of view while it looks through it and gives it back afterwards; its angle and height also count under the 3D lock. The camera's picture comes when the flight has arrived, also when it was loaded before (#1060, thanks daene85).
+- **A fixed device could not be chosen in the editor:** a press on it turned into moving the view before it was selected; it is selected now like a fixed piece of furniture (#1060).
+- **A selected outdoor area shows its corner numbers and edge lengths** in the plan, like a room – the numbers are the ones in the form's list of corners (#1041, thanks daene85).
+- **A device could write an old plan over a newer one:** a phone whose app slept in the background overnight still held the plan of the evening before, and its next edit saved that over what had been drawn on the PC meanwhile. A save now says which state of the plan it was made on, and Home Assistant refuses it when the plan was saved elsewhere since: the newer plan is shown, and your change waits with *take over* or *discard*. A page coming back from the background also loads the plan again (#1059, thanks daene85).
+- **The 3D view jumped when the pointer crossed the floor and room row** on a desktop: the row's thin scrollbar took room only while hovered. Its room is kept now, so nothing moves (thanks TRusselo for finding it, #1053).
+- **The walk stopped at upstairs doors:** on an upper floor whose rooms are drawn a wall's width apart, every door counted as a door into the air – the walk (and the pets) could not leave a room. A door with a room behind it is a way (#970, thanks luisrocejo).
+- **Pets walked through walls:** the shortest way from room to room could lead out of the front door, round the house and in through the closed garage door or a floor-length window – through hedges and fences. Pets now stay indoors and take only the doors between two rooms; and a dog no longer lies down inside the coffee table in front of the sofa (#1047, thanks vincegre).
+
+## 3.1.0
+
+**Neon was just the beginning – your home in every style.**
+
+### Added
+- **Styles (free for everyone):** the 3D view shows the house in many styles besides Neon, Blueprint and Day – *Night / Focus*, *Synthwave*, *Architect's model*, *Pastel*, *Warm / Wood & paper* and the homely styles *Homely*, *Homely evening* and *Winter evening* with real materials (wooden floors, tiles, light walls, soft contact shadows under the furniture). Lights, open windows and active devices keep their signal colours in every style. The styles cost no extra performance and run on old wall tablets. Pick one in the 3D view under **⚙ → 🎨**; every device remembers its own.
+- **Own styles:** **⚙ Settings → 🎨 Styles** shows the house large in the style chosen and every style as a tile; **＋ Make an own style from it** copies any style with all its settings (real materials or an own palette, evening mood, floor texture, light by direction, room corners, shadows, background). Own styles appear in every style list and answer to their name by voice.
+- **Times of day:** the house plan sets a style for the day, the evening and the night, switched by the sun or by the clock; screens set to *House plan* follow it. Dashboard cards can have their own evening and night style (`theme_evening`, `theme_night`), card templates included.
+- **Wall colours:** the room's **Wall settings** (formerly *Wall heights*) colour all walls at once or each wall on its own; the outer walls get a **Facade** colour. The homely styles show them; the editor's 3D pane switches to *Homely* while you colour.
+- **Switching styles by voice and automation:** "NeonPlan style homely", "House to synthwave", "Style back" – also through Assist. New action `neonplan3d.set_style` (style, screens, minutes) and an optional helper entity (`style_entity`) whose state names the style. The newest setting wins: choosing a style for a screen again ends one set by voice or an action.
+
+### Changed
+- The view options' look buttons became one **🎨 style list**; `theme:` in the card takes every style id (`neon`, `blueprint`, `day`, `focus`, `synth`, `cozy`, `evening`, `winter`, `model`, `pastel`, `warm`, own `my_…`), `auto` and `house`. Neon stays the default; nothing changes until you pick a style.
+
+## 3.0.6
+
+### Added
+- **Effects in the editor's 3D pane can rest:** a chip **Effects** beside *Auto / Cut* switches weather, sun, pets and ghost off in the pane beside the plan – a quiet pane for drawing; the 3D view itself is not affected (#1033, thanks daene85).
+
+### Fixed
+- **A new plan showed roofs of the main plan:** on the property, a plan whose rooms were all deleted still brought its leftover roof sections along (a pent roof in the air looked like a glass table) – a building without rooms has no roof on the property any more (#986, thanks Ollywood71).
+- **Snow on a sloping lawn** followed the high edge and floated over the low side; it now lies on the slope (#1036, thanks Anrolosia).
+- **Snow on the roof covered the solar modules' figures;** the living solar overlay now lies on top of the snow (#1031, thanks PetrMa).
+- **A track with several spots** lit only from its middle with one narrow cone; a pack lamp with several glowing parts now lights from each of them, with a cone under each spot (#1034, thanks daene85).
+- **Time travel, day summary:** a room's temperature range used every temperature sensor of its area, dew point and comfort indices included; it now takes the room's own temperature (⚙ Room climate) or the plain temperature sensors. Switches that drive a lamp of the plan count as lights (#1032, thanks abgestumpft).
+- **Free-form outdoor areas had no corners to type in:** the form now lists every corner with X and Y like a room's, so edges can be made straight and parallel; × removes a corner (#1041, thanks daene85).
+- **A lamp without a light showed an "Off" pin** in the marker modes *All* and *In the room*; it could not be tapped. Such a lamp gets no pin any more (#982, thanks daene85).
+- **Import page: a RoomPlan scan of a whole home** whose walls are listed only per room was not recognised; it is now read like any other scan.
+
+### Changed
+- **The frames pack brings its own module:** the living faces of the "Digital Picture Frames" pack (calendar, lists, board, people, camera, cover, person, photos, weather) and their pop-ups now come with the pack (release 2) as a signed module, like Heat Pro; NeonPlan itself only provides the stage. Settings made with 3.0.5 are read as they are. Until an administrator has approved the module under Extensions (the usual review), the frames show a dark pane.
+- **Module API:** a module may lay a picture on the screen face of a piece of furniture (`screen` piece), open a pop-up of plain sections over the view (`popups`, `host.openPopup`), and ask the editor for uploaded pictures (`images` field); the host tells a module where people stand, which look is on and whether the tablet level runs.
+
+## 3.0.5
+
+### Added
+- **Pack "Digital Picture Frames" (shop):** frames whose face lives – a calendar with the next days (what runs now, birthdays, a reminder before an event, new events from the pop-up), a shopping or to-do list you tick off, a family board (calendar, who is home, bins, weather), people, a camera that pops up large when the doorbell rings, the cover of what plays, a person, a photo slideshow, the weather with a three-day forecast and a rain warning. A tap on a frame opens its content large in the middle of the view. The Deco pack's digital frame joins in once the pack is installed.
+
+### Fixed
+- **Window light at night as the lamp's cone:** the patch in front of a window is now the lamp's light through the opening – shifted away from the lamp, fainter with the distance, and nothing from a lamp around the corner that a wall hides from the window. A dining-room lamp no longer lit the terrace in front of the bedroom (#954, thanks rolandarends).
+- **Turned gable on a bigger roof:** a small roof section turned at an angle on a larger one (a 45° gable over a pointed bay in a hip roof) was treated as a dormer and cut boxes out of the slope while vanishing itself; it now meets the roof below like a wing (Discord, thanks Thomas).
+- **Spot grid: "None" for the light stayed automatic:** a grid of spots placed with the light set to "None" still picked a free light of the room (#982, thanks daene85).
+- **No state sync while the view turns:** new states wait until the finger (or the inertia) has come to rest, so a sync no longer costs frames in the middle of a swipe on a slow wall tablet (#952, thanks zanzei26).
+
+## 3.0.4
+
+### Added
+- **Ground mist in fog:** with the fog effect switched on, soft swathes of mist drift low over the ground around the house; the grey behind the house alone was hard to see (#990, thanks PetrMa).
+- **Outdoor steps below the floor level:** outside the rooms the height above the floor may go below 0 (down to −5 m) – steps down to a sunken terrace or a light well (#897, thanks fammastrodaiuto).
+
+### Fixed
+- **Own symbol on lamps and in the room list:** a lamp's own symbol shows in its pin, and the room panel's device list shows the own symbols of furniture and placed devices (#1005, thanks EduK85).
+- **Fixed colour and moods:** a light whose integration reports a mood or scene as its "effect" (Loxone) no longer turns through the colour wheel; a lamp with a fixed colour never animates, and a white-only light never runs a colour effect (#977, thanks chRyX-giT).
+- **Sun arc and compass with the floors pulled apart:** the ring now rides with the ground floor instead of staying down at the cellar (#998, thanks RkcCorian).
+- **Roof in a card with some rooms of the top floor:** a flat or gable roof kept the footprint of the shown rooms only, so its slopes and roof windows no longer matched; the card keeps the whole house's roof (#997, thanks RkcCorian).
+- **Dashboard button covered the full screen button:** a card with both a dashboard path and the full screen button drew the dashboard button on top of it (D1002, thanks karli4711).
+- **U-stair opening one tread too long:** with an even number of risers the second flight is a tread shorter than the first, but the floor above was cut over the whole footprint; the opening now ends at the top tread (#742, thanks daene85).
+
+## 3.0.3
+
+### Added
+- **Fixed colour in 3D** for a lamp: it always glows in the chosen colour, whatever its light reports; on/off and brightness still follow the light. The older option now says what it does: "Glow only while the light shows this colour" (#977, thanks chRyX-giT).
+
+### Fixed
+- **Keep view** also holds the camera between the house view and a floor, not only from floor to floor (#968, thanks RkcCorian).
+- **Time travel on outdoor areas:** a balcony or terrace with an area of its own kept its live values while scrubbing; its sensors replay now (#974, thanks AlBertyBundy).
+- **Household Pro for pack appliances:** the kitchen pack's built-in dishwasher and oven (and any pack washer, dryer, dishwasher or oven) get the time-left and door-sensor fields, the "Done!" pin and the glow while they run (#973, thanks grzegorz914).
+- **Roof windows in a room card:** a card without the top floor drew the roof's windows in the air over the floor shown; such a card shows no roof at all now, like the floor view (#967, thanks RkcCorian).
+- **Fewer passes on wall tablets, part two:** the floor shadows, the light on floors and walls and two fun-pack surfaces are drawn in one pass as well (#952, thanks zanzei26 for measuring).
+
+## 3.0.2
+
+### Fixed
+- **Light out of the windows follows the lamp's real brightness:** a lamp dimmed to 1 % still threw its full colour out of the floor-deep windows onto the terrace (its room keeps a faint glow so a dimmed lamp stays visible, the window light no longer does) (#954, thanks rolandarends).
+- **Motion, door and presence sensors show no watts:** a binary sensor's pin took the power meter of its device (a wired presence sensor, a hub) and said "3 W" at a motion sensor; it no longer does, also in the room view (#337, thanks frops83).
+- **Fewer passes on wall tablets:** see-through surfaces drawn from both sides (glass, light cones, water, screens) are drawn in one pass instead of two – about a tenth of the frame time on a slow mirror, no visible change (#952, thanks zanzei26 for the profile).
+- **Waste bins with dates written as 17-11-2026:** a sensor whose state holds a day-first date with dashes (Afvalbeheer and others) showed "2026 days" until pickup; such dates are read now, and the integration's own `Days_until` attribute is used when it is there (#962, thanks vermeerschn).
+
+## 3.0.1
+
+### Added
+- Pins can show **only while active** (on, open, detected) – per device under "Marker in 3D" (#337, thanks for the idea).
+- **Duplicate floor** in the floor settings: rooms, walls, windows, doors and furniture once more on top of the house, without the links to Home Assistant (#443).
+- **Top-hung windows** that open outwards at the bottom, common in Scandinavia (#327).
+- **Lift-and-slide doors and sliding windows** (new presets, window style "Sliding"): one pane stands, the other slides in front of it as far as its contact says (#397, #361 and their many duplicates).
+- Kamera-Cockpit: a camera can **pop up its picture** for 20 seconds when it detects something new; a tap looks through it (#442).
+- Durchsagen and Das Haus antwortet are out of the beta.
+- **Walk from a room:** a room's panel has a 🚶 button that starts the walk right in that room – with the panel open, the walk button at the top right is hidden (#950, thanks PetrMa).
+
+### Fixed
+- Several radiators on one thermostat each show their pin with the temperature and keep their own icon (only the last one showed before) (#932, thanks skywalker and EduK85).
+- **LED strip sizes named clearly:** a strip's form now says **Length** and **Thickness** instead of width and height – a strip set to 3 cm wide and 2.4 m high was 3 cm long and 2.4 m thick, its light sat in the middle of that block (Discord, David F).
+- **Values without room names:** with the room names switched off, **Values** now still shows each room's temperature, humidity and CO₂ – without the name (wish from Discord, RH and David F).
+- **Window light at night under a terrace:** where a terrace or a path is drawn on a lawn, the light falling out of a window lay at the lawn's height and the terrace covered it – seen from close up it went missing piece by piece. It now lies on the surface on top (#893, thanks @1970lexi).
+- **Cards for some rooms can be turned again:** a card with `rooms:` flew back to its start view at every state change (the rooms looked new each time). Thanks to bpaludo for the exact analysis (#956).
+- **Light no longer passes through walls into the next room:** a lamp hidden behind a wall of its own room (round the corner, behind a pillar) still sent its light through a door into the next room or out onto the terrace (#954, thanks rolandarends). Outdoor lamps are stopped by every wall of the house as well.
+- **Outdoor light ends exactly at a surface's edge:** the light cells on terraces, paths and lawns are now cut to the area's outline – no lit strip past a terrace, no dark strip along its edge – and where areas lie on top of each other the higher surface takes the light (a slab over its beams) (#957, thanks grzegorz914).
+- **Camera fields of view without a black edge:** in the Day look a camera's wedge reaching past the house drew a black half-circle over the background; it now fades out to transparent in every look (#955, thanks rolandarends).
+- **Auto finds slow wall tablets by their frame rate too:** when the view turns at under 20 frames a second, "Auto" switches to the tablet level and keeps it on that device – before, only few cores, little memory or a Fire tablet did that (#952, thanks zanzei26).
+
+## 3.0.0
+
+### New
+
+- **Several floor plans in one installation:** the house, the garage, the garden house, a holiday flat – each with its own floors, rooms, devices, card templates and restore points. A picker at the top switches; ⚙ Settings → 🏘 Floor plans creates (empty, a copy, from a file), renames, sorts and deletes them (a bin keeps them 30 days). The existing plan stays the first one, untouched.
+- **The property:** the other buildings placed beside the house (dragged and turned in ⚙ → Floor plans) show together in 3D, read only; a tap on a room flies into its plan. Also as a card (`plan: site`).
+- **Cards for single rooms:** `rooms:` (tapped on a map in the card dialog) shows only those rooms with their furniture, devices, doors and windows; one room opens with its panel, "here" means that room, the tablet stays there (`rooms_lock: false` lets it leave). "Card for this room" in the editor makes the template.
+- **All floor plans at a glance** and **warnings from another plan** in the one shown, with a way into the room.
+- Announcements look for rooms in every floor plan (`plan:` for one); the full backup carries every plan; Live Presence works on the plan chosen.
+
+## 2.3.1
+
+### Fixed
+
+- **Blinds inside the room:** an outer wall stored in several pieces could end up turned round, and a window's outside blind on it was drawn inside the room. Thanks to T-Eberle, who found it.
+- **"Switch devices only in the opened room":** a swipe over a blind or lamp outside the opened room no longer moves it either – only taps were held back before (#896).
+
+## 2.3.0
+
+### New
+
+- **Dashboard cards built in the editor – card templates:** ⚙ Settings → 🖥 Card templates sets up a dashboard card once, with a live preview on the screen it is for (a 10″ or 7″ Fire tablet, a tablet upright, a phone). On the wall tablet you only pick the template in the card dialog (`template: kitchen_tablet`); every change in the editor reaches every tablet with that template within a second, without a reload. "Where does the tablet hang?" sets its room for "here", the template's name is its screen name and the card dialog links back to the editor. A card with a template shows the template with only its size of its own (fill, height, full-screen button); other options left on it from before no longer apply (the dialog tidies them up).
+- **Reload the screens:** "Reload screens with this template", "Reload all screens" and the action `neonplan3d.reload_screens` let the open wall tablets load their page again – after an update, without a ladder. The tablets say "Reloading …" and come back a few seconds apart.
+- **Open screens:** the card templates list every device NeonPlan is open on – the device ("Fire HD 10 · Fully Kiosk"), what it shows, since when, its version (an old one is marked) – each with a reload of its own.
+- **Vacuum and everything off per room:** a room's form takes the script or button that sends the robot vacuum there; its panel then has 🧹 Vacuum, and ⏻ Everything off switches off its lights, fans and TV and pauses playing speakers (switched sockets only where a lamp hangs on them). By voice: "vacuum here", "vacuum the kitchen", "everything off there".
+- **"there" in voice control:** with a room tapped open, "turn off the lights there" or "TV there on" mean that room; "here" stays the tablet's own.
+- **Fun pack Winter & Christmas (free):** 11 decorations – a Christmas tree on its plug, an Advent wreath that lights its candles by date, a window star, a candle arch, a light-up reindeer and more – plus fairy lights along the eaves (or the whole roof), snow on the roof and lawn while it snows, and a neon firework at New Year's midnight.
+- **"Only show while …" for every piece of furniture:** a piece stands in 3D only while an entity is in a state – decoration for a season, switched by a helper or an automation.
+- **Fun packs in the editor's settings:** ⚙ Settings → 🎈 Fun packs holds the settings of every fun pack; the extensions page points there.
+
+### Fixed
+
+- **Walls under an overhang set by hand (#921):** the walls now end under the roof on sides with their own overhang. Thanks to @1970lexi!
+- **Blinds that only tilt (#920):** slat-only covers open and close by their tilt from the room panel and the central menu. Thanks to @jsdray!
+- **Small items could not be moved (#908):** their corner handles left no room to grab them; the handles now sit outside small pieces. Thanks to @vincegre!
+- **Camera wedge (#901):** it turns red on motion alone, not only after a lamp on the floor changed. Thanks to @apalm8!
+- **Window light outside (#893):** the light falling out of a window lies on the ground under it instead of disappearing when zooming in. Thanks to @1970lexi!
+- **Modules may light an item's top plate (#917):** for Wärme Pro's status glow. Thanks to @grzegorz914!
+
+## 2.2.0
+
+### New
+
+- **NeonPlan Print for supporters (beta):** your house as a 3D print – floors you lift off, the roof as a lid, a base plate with your name. Supporter-Pass holders find it under Extensions ("Open NeonPlan Print" copies their supporter code) and in the editor's backup section ("🖨 Print in 3D" exports the plan and opens [print.mastershort.de](https://print.mastershort.de/)); a small "New" dot on Extensions points to it once. The Supporter Pass offer under Extensions says it includes NeonPlan Print. Free during the beta until 30 November 2026, private and non-commercial use only.
+- **Gates in fences (#818):** a fence's form has "+ Gate in the fence": a gap in one of its sides, cut like a door in a wall, with a garden gate (one leaf), a double gate or a sliding gate. With a motor or switch (cover, switch, input_boolean, lock) and/or a contact the gate opens in 3D – a sliding gate runs along the fence at its run time – and a tap on it switches it. Thanks to @fammastrodaiuto for the wish, and to ProvUK's fork for the idea of the cut.
+- **Floor plan only:** "Show" → "Floor plan only" (remembered on this device) draws walls, doors, windows and stairs without furniture; the devices and their pins stay. On a dashboard: card → "Floor plan only", or `plain: true`. Thanks to SteveBloX's fork for the push.
+- **Right click goes one step back** (⭐ → ⚙ Settings → Controls, off by default): a short right click in the 3D view closes the room or goes from the floor back to the house, like a double tap on empty space. Idea from ProvUK's fork.
+- **Sloping free-standing walls (#834):** a wall drawn with the wall tool can now fall in height from one end to the other, like a room wall – "◢ Sloping" in the wall's form, with a height at each end. Thanks to @daene85!
+- **Sun arc around the whole plot (#833):** the sun arc and compass ring can stand around everything drawn – rooms, outdoor areas, fences and free walls – instead of only the house (⭐ → ⚙ Settings → Look, or the editor's settings: "Sun arc around: the whole plot"); the house stays the default. Thanks to @grzegorz914!
+- **Energy cables: a cable hub of your own and the inverter cable to the grid point (#841):** with Energie Pro the cables can meet at a point of their own, set with a tap in the plan (the house board, while the meter stands at the grid connection), and the checklist counts it as done; an inverter's cable can end at the grid point instead of the meter. Plans without these settings stay as they were. Thanks to @grzegorz914!
+- **Overhang per side (#863):** a roof section's form can set the overhang of each side by hand ("Overhang per side"); off, it stays automatic.
+
+### Fixed
+
+- **Floor openings in split levels (#813):** a floor opening or stairs from the floor below whose outline reaches a few centimetres past the room line (into the wall) left the whole room floor closed; the opening is now cut in the part inside the room. Thanks to @PhilWil91!
+- **Light wells under a raised path or lawn (#890):** cellar windows above a low ground level but below a lawn or path raised up to the house get their light well, in 3D and in the editor, also after the window is changed or set to "Cellar window". Each well has its own depth ("Depth from the wall", 0.8 m as before), so it can stay within a narrow path. Thanks to @1970lexi!
+- **Terrace roof poking into the house (#863):** a roof section drawn against the outer face of a thick wall (from about 35 cm) or a hand's breadth short of it kept its overhang on the house side and ran into the house; it now stops at the wall, without posts there. Thanks to @daene85!
+- **Sun patches no longer look like white blocks (#819):** the sunlight through wall and roof windows lies on the floor as a soft, warm patch with fading edges instead of a flat grey slab; a window listed twice in a plan lights it only once. Thanks to @LucidityCrash!
+- **Heatmap colours with an own accent colour (#558):** rooms between about 18 and 20.5 °C no longer take the accent colour of the neon look – a cream accent made them look 23–25 °C warm. Floors keep their temperature colour; lines and buttons keep the accent. Thanks to @frops83!
+
+## 2.1.0
+
+### New
+
+- **Voice control knows where the tablet hangs** (⚙ Settings → 🎙 Voice control → Room of this device, empty by default): on a tablet with a room, sentences without a room name apply to that room – "Lights on", "Turn off the lights here" or "Close the blinds". On a dashboard the card has the same choice (Features → Room for "here", YAML `voice_area: <area id>`). A room you name still wins. Home Assistant's Assist hears the sentence as said in that room's area, as from a voice satellite there.
+- **Slovenčina – Slovak (#870):** NeonPlan now speaks Slovak, the 19th language (fetched only when Home Assistant runs in Slovak). Thanks to @Havinko1991 for the setup texts!
+- **The size of the glass cards for everyone:** ⭐ → ⚙ Settings → Look → "Size of the glass cards" sets how large the energy, heat pump, car and device cards are – before, only the Energie Pro settings in the editor offered it.
+- **More of the card in its visual editor:** start room, 3D lock, keep view, walk on or off, controls left or right, and the time travel's range and speed – no YAML needed for them any more.
+
+### Fixed
+
+- **Card:** the "values" heatmap (numbers at the room names) is a valid card option, and the "Extensions" button in a Pro hint opens the extensions in the NeonPlan panel instead of doing nothing.
+- **"Switch devices only in the opened room" is easy to find (#883):** it sat only in the ⚙ menu of the 3D view (⭐ → ⚙ Settings → Controls); now it is in the editor too (⚙ Settings → Weather & warnings). Thanks to @PaulBiod!
+- **The attic no longer stands out of the roof as a step (#855):** a wall of a high attic floor that runs along the eaves can lie under the slope across its thickness – its outer edge stood out of the roof along the whole length once the wall turned opaque. It now ends where the roof passes through it. Thanks to Frank (@Kuddelsoft) for the plan and the patience!
+- **Colour effects no longer slow the 3D view (#885):** a light with an effect (colour loop, "Breathe", "Movie Mode" …) recoloured the light on floors and walls by computing it anew eight times a second; now the light is computed once and only its colour changes, and while you turn or zoom the view the effect holds. Thanks to @kzaoaai!
+- **A shared template leaves out every link to your home:** "Share as template" also removes entities that newer features keep (door locks, gas and water meters, the rain and outage sensors, the extra entities of furniture, module settings), wherever they stand in the plan. Thanks to Frank (@Kuddelsoft) for noticing!
+
+## 2.0.11
+
+### New
+
+- **Switch devices only in the opened room** (⚙ Settings → Controls, off by default): in the house and floor views a tap on a device opens its room instead of switching it, so a tap meant for a floor no longer moves a blind by accident; a long press still opens the menu.
+
+### Fixed
+
+- **Power strips and multi-gang sockets switch again (#868):** the menu of a socket or wall switch with several gangs showed its buttons, but a tap went through them. Thanks to @legospieler!
+- **Announcements on Echos of Home Assistant's own Alexa Devices integration (#865):** such an Echo now announces through its own announce notify entity instead of text-to-speech, which it cannot play. Thanks to @wh1tetiger for the detailed report!
+- **Announcements on the terrace (#866):** an outdoor area with a Home Assistant area counts as a room for announcements; the speaker there gets its 📢 too. Thanks to @daene85!
+
+## 2.0.10
+
+### Fixed
+
+- **Light wells in thicker cellar walls (#843):** a cellar window in a room edge with a wall thicker than the settings' outer walls gets its light well again, in front of that wall. Thanks to @RkcCorian and @1970lexi!
+- **The form of what you tap in the plan (#837):** choosing a door, a garage door, an item or a room in the plan scrolls the editor's sidebar to its form, which was out of sight when the sidebar was scrolled down. Thanks to @golfinho24!
+- **Fog only outside (#854):** the weather's fog now starts behind the house as seen from the view, so the rooms and their lights stay clear and the surroundings fade. Thanks to @frops83!
+- **Turned roof sections can be resized (#856):** a section turned by any angle (also 180° for a pent roof's other side) shows its corner handles again; dragging one keeps the opposite corner where it is. Thanks to @frops83!
+- **A camera's look at the camera's height (#779):** the furniture item that shows a camera hangs where the camera's symbol is (under the ceiling for a ceiling camera) and follows a new height; the built-in camera model goes at once when a look is chosen. Thanks to @EduK85!
+
+## 2.0.9
+
+### New
+
+- **Announcements from automations:** the action **NeonPlan 3D: Announcement** (`neonplan3d.announce`) says a message on the rooms' speakers with the Announcements module's settings (speaker per room, quiet time, text-to-speech), also with no NeonPlan page open – to every room, to rooms by name or area, or to one floor. **On NeonPlan screens** every open NeonPlan screen speaks it itself with a chime and shows it big – an old wall tablet becomes a speaker. Needs the Announcements module.
+
+## 2.0.8
+
+### Fixed
+
+- **Extensions in English (#825):** the newer packs, Pro add-ons and modules (Announcements, Heat Pro, Household Pro, Window watch, The house answers, the new furniture packs) have English names outside German, and NeonPlan tells the shop the language, so its offers come in it. Thanks to @twynne!
+- **Devices a room shows that could not be hidden (#815):** what a room's panel shows through a piece of furniture, a window or a pin – a dryer's status text, a PC's internet switch, an inverter's state – is listed in the editor's devices of the room too, so 👁 hides it. Thanks to @frops83!
+- **3D view crashing on older graphics chips (#827):** if the 3D view loses its graphics right after it starts (older AMD chips in Chrome on a Mac failed on the new sun effects), the browser remembers it and starts without the sun's arc, the house shadow and the window glow at night; ⚙ Settings says so. Every new version tries them again once. Thanks to @Wolk9!
+- **Plant tag in a room (#817):** a thirsty plant's tag (Household Pro) also shows with its room opened, like bins and post. Thanks to @frops83!
+- **Sloping walls (#821):** the light on a sloping wall ends at its slope (no glowing rectangle above it), the wall blocks light only below it, and where the slope crosses the cut height no piece of the wall is missing. Thanks to @RealSkyMaster!
+- **Window glow on the driveway (#822):** a window over a balcony lights the balcony, and the glow ends at its edge instead of falling onto the ground below. Thanks to @1970lexi!
+- **24-hour clock (#823):** the clock, the sunrise and sunset times on the sun's arc and the times of the motion trail and the time travel follow the time format of your Home Assistant profile (12 or 24 hours), not only the language. Thanks to @erwinsnl!
+- **Outdoor areas in locating (#828):** outdoor areas with a Home Assistant area (a terrace) can be chosen as a scanner's room, people are shown there, and a terrace door joins them with the room behind it. Thanks to @dennisgoedde!
+- **Power outage from a switch (#831):** **Report a power outage with** offers grid sensors, UPS and grid states, the mains voltage and helpers of your own, no longer every switch (a battery's "phase power control" that is on is no outage); a grid status "Off Grid" counts as an outage. A switch chosen before keeps working. Thanks to @Wolk9!
+- **Ready for Home Assistant 2026.11:** devices split into channels (Tuya, Z-Wave, ZHA groups) keep their room.
+
+## 2.0.7
+
+### New
+
+- **Sun path and house shadow:** a glowing arc around the house shows the sun's way today with sunrise and sunset, the house's shadow lies on the ground and wanders with the sun, a compass ring with N E S W. On by default, switch off in ⚙ Settings.
+- **Windows glow outside at night:** lit rooms throw their light out of the ground floor's windows onto the lawn, in the room's light colour.
+- **⚙ Settings in the 3D view:** the ⭐ central menu opens sun & night, window light, sun patches and the warnings without the editor; every module with settings gets a section there, under its own heading or the module's name.
+- **Modules in rooms and the ⭐ menu:** modules can offer a sheet in a room's panel and in the ⭐ menu, fields in a room's form, the microphone and the rooms someone is in – used by the new **Announcements** module (beta, Supporter Pass first).
+- **Modules: lists and markers in rooms:** a module's list (the announcement sentences) is edited entry by entry – ✕ takes one out, a field adds one; a module's marker may stand in a room and open its sheet there (📢 over the rooms' speakers – modules learn where the plan's speakers stand, a marker may show an emoji); a module's sheet has a link to ⚙ Settings for administrators.
+- **Detection sensors per camera (#815):** a camera's form lets you choose the sensors that count, also another device's (Frigate for a Reolink camera). Thanks to @frops83!
+
+### Fixed
+
+- **Camera shown as furniture (#779):** the chosen model is the camera's look – one item that replaces the last one, moves and turns with the camera and goes with it; the built-in camera model hides, and "Built-in camera model" brings it back. Thanks to @EduK85!
+- **Editor error "Cannot convert undefined or null to object":** the selected room, door or item not on the floor shown made the editor throw (usage reports, ~20 installations).
+- **Room panel with a removed entity:** an entity placed in the plan but removed from Home Assistant no longer breaks the panel.
+- **Wärme Pro's lists on the PC (#815):** a module's form is made only when the plan or the devices change; the lists closed at once and the CPU load went up. Thanks to @frops83!
+- **Paused players' cards (#815):** a paused card goes after ten minutes (Echos stay paused for hours). Thanks to @frops83!
+- **Smart Home pack sensors (#810):** the pack's sensor models link to any binary_sensor or sensor, also without a class (Local Tuya). Thanks to @vinimeca!
+- **Importing a too large full backup:** instead of "[object Object]" the message names the reason (a full backup with many packs can be larger than Home Assistant takes in one go – share plans with **Export plan**).
+- **Redox at the pool (#814):** a redox probe reporting a voltage in mV counts as a water value. Thanks to @Deninho91!
+
+## 2.0.6
+
+### New
+
+- **Opening angle for doors:** every door has an **Opening angle** (Default, 15°–90°). Without a sensor the leaf stands that far open, with one it opens that far. Default stays as before. Thanks to David on Discord!
+- **Warning for unavailable contacts (off by default):** in the editor's settings under Weather & warnings, a window or door contact that has been unavailable for 10 minutes (empty battery, out of reach) can raise a warning – the window would look shut although nobody knows.
+
+### Fixed
+
+- **Module updates that wait for approval (#805, #707):** the shop list showed a fetched module update as "Update available" again, and the button only fetched it once more. It now says the update waits for your approval and opens **View update & approve**. Thanks to @Luft86 and @underthewheel!
+- **Pictures on small smart displays (#799):** the cover or picture on a screen fills the screen with a small frame instead of a thick border on small displays. Thanks to @tomv79!
+- **Stretching cabinets with drawers (#801):** drawers, doors and shelves of a stretched item grow evenly instead of only the top or bottom one. Thanks to @daene85!
+- **Doors in split inner walls:** a door wider than its piece of an inner wall reaches into the next piece when the wall carries straight on, instead of being squeezed.
+- **"Mark as put out" on bins (#793):** the button now really takes the tap. Thanks to @246tbwpjzk-cell!
+- **Camera wedge on sunken floors (#802):** the field-of-view wedge lies on the ground it falls on (lawn, terrain) instead of going into the ground. Thanks to @BudBundi!
+
+## 2.0.5
+
+### New
+
+- **Turn a roof part (#634, #724):** every roof part in the editor (Roof tool, select a part) has a **Turn** field with ↺ 15° / ↻ 15° buttons, for wings and extensions at an angle. The part turns clockwise in the plan; dormers and cross gables on it turn along, roof windows and solar fields on it stay on it. A turned part is moved by dragging and keeps its size; to change its size, turn it back to 0°, resize, turn again. Every roof drawn so far stays at 0° and looks exactly as before. Thanks to @s0undmaker and @goldrapper19872504!
+
+### Fixed
+
+- **Cameras shown as furniture keep their camera pin (#779):** the camera keeps its pin with all its settings (field of view, view wedge, Camera Cockpit); the furniture model only joins it instead of taking the camera over. Thanks to @EduK85!
+- **Roof windows find their floor and room (#783, #712):** for the window watch and the spoken answers a roof window is counted in the room of its sensor's area, or in the room beneath it, instead of always on the top floor without a room. Thanks to @sjess and @frops83!
+- **Jumping to a warning on slow tablets (#784):** the room of the warning now opens even when the floor takes a moment to draw. Thanks to @sjess!
+- **"Mark as put out" on bins (#793):** the button in a bin's bubble takes the tap again. Thanks to @246tbwpjzk-cell!
+- **Floor order (#777):** the floor's up/down buttons say that they only change the order in the list; where a floor sits in 3D comes from its height above the ground. Thanks to @liltoddy!
+- **The point the view turns about (#733):** the editor's 3D pane shows a small cross where the view turns about, and pointing at 📌 in the 3D view shows it too, so the house can be framed before saving a start view. Thanks to @PetrMa!
+
+## 2.0.4
+
+### Help make NeonPlan better
+
+- **A one-time invitation to the usage reports:** admins who have not switched on the anonymous reports see one note in the editor saying why they help. **Have a look** opens the setting, **Not now** hides it for good. Nothing is switched on by it.
+
+### Fixed
+
+- **Garden items stand on the ground (#708):** bins, mowers, garden furniture and outdoor steps outside the rooms stand on the lawn, the terrace or a lowered terrain beneath them instead of at the floor's level – by default the lawn lies 20 cm below the floor, so they floated a little for everyone. Heights set by hand stay. Thanks to @Anrolosia!
+- **Window boards on windows down to the floor (#702):** a board chosen by hand ("inside only" / "outside only") now shows on windows down to the floor and terrace doors, at the floor, and glass walls offer the setting too. By default nothing changes. Thanks to @daene85!
+- **Round shadows (#719):** round tables, plants, a trampoline, a parasol, a fire pit cast a round contact shadow, and in the garden it lies on the ground the item stands on. Thanks to @PetrMa!
+- **Slat buttons only with slats (#704):** roller shutters, garage doors and curtains that announce slat buttons (KNX does) no longer show them unless they report a slat position. Thanks to @daene85!
+- **Pets stay inside upstairs (#766):** an outer door or French window on an upper floor only lets pets (and the walk) out when a balcony or terrace is drawn behind it. Thanks to @twynne!
+- **Window contacts without a device class:** binary sensors without a class (KNX, enOcean, template sensors) are offered as contacts too.
+- **Editor:** a furniture field that reported its change after the item was deselected no longer throws (found through the usage reports).
+
+## 2.0.3
+
+### Fixed
+
+- **Energie Pro: cables to the devices are back when rooms are drawn a little apart (#731).** The cables run from room to room through shared walls; rooms drawn with a small gap between them (a stairwell, a hallway) cut the way, and only the grid cable was left. Gaps up to about a metre are now bridged; a detached building further away is still not wired through the garden. Thanks to @netrunnercs!
+- **Gas and water meters from the Utilities pack take their reading (#730):** the "Gas meter with pulse reader" and "Water meter with reader" asked for a power sensor in W; they now offer a meter reading in m³ or litres, shown at the symbol. Thanks to @PetrMa!
+- **Window watch and roof windows (#712):** a roof window opened by its window motor counted as shut for the window watch and the spoken answers (the 3D view showed it open). Thanks to @frops83!
+- **Front doors with glass show the pane from both sides (#712):** from outside the solid leaf hid it.
+- **The Deco pack's plants take a plant sensor (#712):** Monstera, fiddle-leaf fig, palms, bonsai and the other new plants have leaf colours of their own and were not taken for plants; plants are now also known by their name.
+- **Blinds outside again on walls drawn on their own (#542):** a single wall drawn as an outer wall (rooms on one side only) had its "inside" by the direction it was drawn in, so its blinds and sills could end up in the room, and it never turned to glass like the other outer walls. It now finds its outside by the rooms. Thanks to @Kodak1976 and @Deninho91!
+- **Located people show without a tracker of their own (#744):** a Home Assistant person with no tracker (state "unknown") counted as away, so the figure of a person located at home stayed hidden. Thanks to @marcus2k9!
+- **Pets walk smoothly again on phones and tablets (#752):** on the tablet level they moved at 5 frames a second and stood still after half a minute; now about 15, and they keep walking while the view rests. Thanks to @Deninho91!
+- **A light's power is its own (#743):** where one device carries several lights (an actuator, PowerCalc), every light got the device's first power sensor – a bathroom light's power showed in the office. Now PowerCalc's sensor named after the light comes first, else one in the light's room. Thanks to @daene85!
+- **Wärme Pro (release 5): "heating since" tells the real time (#735)** – a card opened while the heat pump was already heating said "since 0 min"; a target of 0 °C (none reported) is no longer shown. Thanks to @tomv79! **Towel radiators** of the bath pack now get their heating pipes like other radiators (the electric one stays without, #751). Thanks to @holle021272!
+
+### Live Presence
+
+- **People stand where a presence zone says:** when a presence sensor of the room (such as an Aqara FP2 with zones) reports its "Sofa" or "Sessel" zone as occupied, the person's figure stands at that sofa or armchair instead of in the middle of the room. Zones are matched to furniture of the room by name – built-in and pack furniture, or the furniture's own name. A door zone ("Entrance hall", "Terrace door") places the figure just inside the room in front of the door to the room of that name, or of a door to the outside; "rest of the room" keeps the middle.
+
+## 2.0.2
+
+### Live Presence on Android
+
+- **Android phones are found by themselves:** the assistant lists every phone whose Home Assistant app has the BLE Transmitter switched on, with its name and person – no need to hold it next to a receiver (#726). Thanks to @frops83!
+- **Hints for weak settings:** out of the box the app sends at the lowest power in power-saving mode, so the receivers barely hear it. The assistant now says when to set the transmit power to "High", the advertise mode to "Low latency", or to switch the transmitter on.
+- **"⚠ not heard"** next to a device that no receiver hears, in the device list and while learning – such as an Android tablet paired through the key helper, which does not send that key in the background (#727). The key helper button is now "For an iPhone", with a note to use the app's transmitter for Android. Thanks to @rolandarends!
+- Weak beacons now show among the devices nearby (from -90 dBm), each only once although its address changes.
+
+### Live Presence
+
+- **Watch and phone disagree about the room:** when both are heard at the same time in different rooms (a shared wall fools the watch), the phone now wins when it is clearly surer – and no extra phone symbol appears next to the person. A phone left lying while you walked on with the watch still shows where it lies, and a watch taken off (lying in one room for ten minutes while the phone walked on) no longer holds the person there – the phone decides, the watch stands as a symbol. The 3D figure and the spoken answers follow the same rule.
+- **Voice questions fly the view there:** "Where is Torsten?" flies the open NeonPlan views into his room, "Who is home?" tours every room with someone in it. On by default, switch in the locating assistant under Live; while people are shown to admins only, only admins' views fly to them.
+- **"Where is Anna?" with an AI agent:** the Assist sentences now carry the names locating knows (people, first names, devices, "Annas iPhone"), so Assist answers them locally even when an AI agent such as Gemini handles everything else – before, the agent only said "Anna is at home". "Who is home?" works the same way.
+- **The NeonPlan panel's own microphone asks locating first:** "Who is home?" there gave the rooms-free answer of the voice answers module; now it is the locating answer with the room tour.
+- **Old Assist sentence files are updated again:** a file an older NeonPlan wrote with fewer sentences was taken for the user's own and never replaced, so newer questions like "Who is home?" went unanswered.
+
+### Fixed
+
+- **The 3D view no longer jumps after a freeze:** turning or zooming while the view was still busy just after opening was replayed seconds later, and the view landed somewhere else in the house. Moves that waited out such a freeze are now dropped (#712). Thanks to @frops83!
+
+## 2.0.1
+
+### New
+
+- **Help make NeonPlan better (opt-in, off by default):** under ⚙ Settings → 🛟 Help improve, anonymous usage counts and scrubbed error messages can be switched on – at most one report a day. No names, entities, areas, floor plan shapes, IP addresses or licence keys, nothing from locating; "View report" shows the exact next report, "Delete data" removes what was sent.
+
+### Live Presence
+
+- **Spoken names are matched tolerantly:** "Where is Thorsten's Apple Watch?" finds "Torsten Apple Watch"; "my iPhone" is the iPhone of the person who asks; a first name alone means the person.
+- The manual link of the assistant opens the locating chapter directly.
+
+### Installing
+
+- **HACS can install and update NeonPlan again.** Since 23 October, GitHub's release downloads carry a header that HACS cannot read, so HACS failed on every release zip, for all integrations (hacs/integration#5643). NeonPlan now lets HACS fetch its files one by one, which is not affected. The Home Assistant log may show one "Failed to download zipball" error during the update; it is harmless.
+
+## 2.0.0
+
+### Live Presence – who and what is where (new, free)
+
+- **Without Bermuda or ESPresense:** NeonPlan finds out which room a person, a phone or a key tag is in – from the Bluetooth scanners Home Assistant already has (Shelly Gen2/Gen3 with Bluetooth scanning, ESPHome Bluetooth proxies, the USB adapter). No new hardware, no YAML.
+- **Learning instead of guessing:** a setup assistant in the editor (⚙ Settings → 📡 Locating) places the scanners (from the Home Assistant area of their device, a pin or piece of furniture in the plan, or their name), finds Android phones (the Home Assistant app's BLE transmitter) and key tags nearby, and learns every room in 90 seconds of walking. Rooms without a scanner of their own (hall, guest toilet) are recognised too, and the plan's doors keep the result from jumping through walls. An accuracy check per room; after learning NeonPlan also tells where each scanner really stands.
+- **Faster with presence sensors:** motion and presence sensors of a room (radar like the Aqara FP2 too) move the right person there at once – Bluetooth tells who, the sensor tells when.
+- **In 3D:** people stand as a glowing figure in their own colour and glide from room to room; things are small symbols. People in 3D (assistant, Live step): figure, pin or off. The room panel shows who is here; an option shows people to admins only.
+- **A sensor per device** (`sensor.<device>_room`, state = room name, attributes `room_id`, `area_id`, `floor`, `probability`, `since`, `last_seen`) for automations.
+- **Voice:** "Where is my iPhone?", "Where is Torsten?", "Who is home?", "Ring my iPhone" (a loud notification through the Home Assistant app) – answered by Home Assistant itself, no screen needed. Picked Assist sentence files get new sentences after an update by themselves (a file you changed stays as it is).
+- **Key helper for iPhone and Apple Watch, no Mac needed:** an ESP32 (about 5 €) flashed right from the browser ([neonplan3d.mastershort.de/keys](https://neonplan3d.mastershort.de/keys/)) reads the Bluetooth key while the watch or phone pairs with it; the assistant shows the key and adds it with one tap. Keys can also be pasted (hex or Base64). Built on irk-capture by Derek Seaman (MIT) – thank you!
+- Everything is evaluated in Home Assistant; nothing leaves the house.
+
+## 1.26.0
+
+### Faster on wall tablets
+
+- **Moving decorations rest on the Tablet level:** the energy flow, the solar fields, the sound rings, the pool water, robot vacuums, colour effects and the pets draw about 5 frames a second instead of 15 and stand still 30 seconds after the last touch; a touch, or something new that starts to move, wakes them. In the busy demo house an untouched Fire tablet drew about 45 frames a second without end; now it draws about 5 for half a minute and then none. Auto and High are unchanged.
+- **Warnings:** on the Tablet level the warning at the top glows steadily instead of pulsing (the pulsing shadow kept the tablet's graphics busy all the time); the rooms still pulse. A pulse now recolours only the floors whose rooms change.
+- **Power sensors:** on the Tablet level a change of measured values alone (watts, temperatures …) reaches the 3D view at most every 2 seconds; a switch, a door or an alarm still shows at once.
+- **Blinds and doors in motion** recompute the light and sunlight in their room about 5 times a second on the Tablet level instead of every frame (and once more where they stop).
+- **Fire tablets found more reliably:** "Auto" now also picks the Tablet level on the Fire HD 10 Plus (model codes with five letters, such as KFTRPWI).
+- The glowing link lines of the holograms drop their blur filter on the Tablet level, like the other glows.
+
+### For modules
+
+- Modules can show more in the house: lines and glowing areas on the floor, round markers, richer glass cards (state line, a second value, a row of values, small cells, filled bars, a hint), fields in a piece of furniture's form and a section of their own in the editor's module dialog. Without a module nothing changes.
+
+### Fixed
+
+- **Awnings without a marker** (#688, thanks @fammastrodaiuto): a copied awning keeps its pin (two pieces of furniture on one entity each get one, like lamps), and a new awning over a terrace or garden area finds that area's awning cover by itself (never a roller blind).
+
+### Haushalt Pro
+
+- **Out of beta:** Household Pro is now in the shop for everyone (it stays in the Supporter Pass).
+
+Polished with the wishes of the beta testers on Discord – thanks to MacGywer, Frops, Obaid, Pol3cat and Michael M.
+
+- **Bin tags easier to read:** light, larger letters on a solid dark plate with the bin's colour as its edge (blue text on glass was hard to read); from afar they no longer shrink to unreadable. Bins standing together share one tag with a line per bin in pickup order, and tags that would still cover each other move up.
+- **Only the next pickup, only a few days before:** two new settings in the bin's form, for all bins of the plan – *Label only the next pickup* and *Show tags only … days before* (empty = always). Without them everything stays as before; bins without a tag still show in "Today in the household" and their pickups on a tap.
+- **"Put out" per bin:** an optional helper, switch or binary sensor that is on while the bin is outside – the bin stops glowing, its tag says "put out ✓", and a tap on the bin offers *Mark as put out* (for a helper or switch; a nightly automation resets it). Plan field `bin_out`.
+- **Mailbox and plants from afar:** a round letter or plant symbol instead of tiny text; the text appears when zooming in.
+- **Second service:** every electric item can have a second service sensor with its own threshold – a robot vacuum's brush and its dock's dust bag, say; each one due is a line on "Today in the household". Plan fields `service2`, `service2_min`.
+- **No phantom time left:** a washer, dryer or dishwasher shows its time left only while it runs – not when its plug or state says off, ready or standby, or its power is at standby, even if the display sensor still reports minutes after a power cut.
+
+## 1.25.1
+
+### New
+
+- **Door with a smart lock:** a tap on the door itself opens its menu with **Lock** or **Unlock** (by the lock's state, always asking first), and the leaf's free edge glows softly in the accent colour while the lock is unlocked – whatever the door contact says. The lock pin stays as it is; doors without a lock and doors with a drive behave as before (#682, thanks @ciechompl).
+- **Garage door with a pulse switch:** **Drive** also takes a `switch`, a `button` or an `input_button` (an opener that answers a short pulse). A tap on the door switches it on or presses it – asking first when *Ask first* is ticked – and the door's state comes from **Contact**, so the separate door contact stays. A switch chosen under *Contact* in older plans still counts as open while on (#677, thanks @ciechompl).
+
+### Fixed
+
+- **Door with a smart lock showed a roller shutter:** a blind's position sensor that stayed in the door's data after the drive was set to *None* (or after a window was turned into a door) lowered a shutter over it; the position sensor now only counts with a blind (#682, thanks @ciechompl).
+- **Voice: "Zeige mir Garage" showed the outdoor area:** between names of the same length a room's own name now wins over an outdoor area's, and own names over further names (the Home Assistant area's name, aliases), so the room "Garage" in the cellar is no longer lost to a driveway linked to the garage's area (#668, thanks @1970lexi).
+- **Wall lamps from furniture packs:** the halo and the light now sit in the lamp's glowing parts (the lantern's glass) instead of floating in front of it; pack lamps without glowing parts are unchanged (#680, thanks @LiveSide).
+
+## 1.25.0
+
+### New
+
+- **Window sill per window:** a window's form has **Sill** – *automatic* (default: board inside and sill outside from 30 cm sill height, as before), *none*, *inside only* or *outside only*. In automatic mode a window that sits directly on another window or a door of the same wall (a transom light, a split floor-to-ceiling front) no longer gets a board sticking out of the wall. Plan field `sill_board`, also in the import format. (#655, reported by LiveSide)
+- A window or door may reach across an open transition between two rooms when the outer wall carries on in a straight line (#624, thanks @Maddin2020).
+- **Roof sections with a different end at each end:** gable, hip and half-hip sections get **End left/right** (or top/bottom) – a hip at one end and an upright gable at the other, for example. Without a choice every end stays as the shape has it (#466, thanks @14RL67).
+
+### Changed
+
+- A light switch's button glows softly while what it switches is on: a light in its colour, anything else in the look's accent colour (#593, thanks @RkcCorian).
+- **Day look:** more contrast – walls, floors and furniture keep a wider range of shades and a bit more colour, lines are darker (#645, thanks @frops83).
+- **Rooms with hundreds of entities** (LED strip segments from Govee2MQTT): an unfolded device lists the first 40 (the search narrows it down), one button hides or shows all of its entities in the room panel, and a room can keep up to 2000 hidden entities (was 200, saving failed beyond that) (#645, thanks @frops83).
+
+### Fixed
+
+- A wall socket or switch placed a little into a wall is drawn on the wall's face in 3D (its glow and pin with it), and on a wall lower than its mounting height – a balcony parapet – it comes down to stay below the wall's top; it was hidden inside the wall (#593, thanks @RkcCorian).
+- Pack furniture with colours of its own (the Halloween pumpkins) keeps them down to the ground in the Day and Blueprint looks, like the waste bins; its lower half turned grey or blue (#609, thanks @TheBhim).
+- The **Light well** tick in the window form now comes from the same decision that draws the well in 3D (an outer wall, a floor in the ground, the sill under the ground), so it is offered for every window that gets a well and only for those (#524, thanks @1970lexi).
+- **Editor:** with "3D beside" and the side panel not pinned, the opened panel became an extra column (since 1.24.0) that pushed the plan and the 3D pane aside; it opens over the 3D pane again and can be made wider at its edge like the pinned one (#658, thanks @fschade).
+- **Editor with "3D beside" slowed down:** every change of the plan disposed the 3D materials before the new ones were drawn, so the shaders were compiled again on each rebuild; the old materials are now released after the next frame, when the new ones already use the same shaders (#645, thanks @frops83).
+- **Smart lock on a double (terrace) door:** the pin sits on the main leaf (hinge side) instead of on the seam or the second leaf (#645, thanks @frops83).
+- Walls cut by a roof that is no longer there: after **Back to one roof** the kept roof sections still trimmed the walls in 3D (a notch in the upper floor, odd slopes in the attic). Only a roof built from sections cuts walls now, and a lower storey's roof whose ridge just pokes through the floor above no longer cuts that floor (#621, thanks @Maddin2020).
+- Glowing top edges at wall joints: where a taller wall meets a lower one, its free end now gets its top edge and the edges down to the lower wall, and corner lines reach up to the tallest wall, so the top outline no longer breaks off at corners and T-joints (#417, thanks @rolandarends).
+- Robot vacuum with dock (pack): while the robot cleans, the dock stands empty – the model's own robot drives off instead of a second one appearing (#645, thanks @frops83).
+- An item with its own **Running from (watts)** shows only its state (or "Standby") on the pin below that value, not its standby watts (#645, thanks @frops83).
+- The 3D lock keeps the saved start views of the house, floors and rooms: flying to one takes its own angle (#645, thanks @frops83).
+- Setting the first **State from** entity to *none* moves the second one up instead of leaving it active but hidden in the form (#645, thanks @frops83).
+- The workshop light and other flat ceiling lights from packs get the **Height above floor** field (#645, thanks @frops83).
+- The tags on bins, mailboxes and plants (Haushalt Pro) grow with the symbol size like the pins' labels (#645, thanks @frops83).
+- The heat pump's indoor unit, gas boiler, buffer tank and water heater from the packs take a `water_heater` entity; the pin shows its mode and water temperature (#645, thanks @frops83).
+- Entities hidden or disabled in Home Assistant are no longer picked automatically (e.g. a robot vacuum for its dock); one placed in a room before stays in the editor's device list so it can be removed or hidden (#645, thanks @frops83).
+- Two roofs meeting at a right angle form a proper valley: a wing running into the slope of a higher roof reaches on into it and ends at its surface instead of standing up with a gable (#605, thanks @holle021272).
+- Overlapping roof sections cut each other cleanly: what lies under another section is left out, ridges and eaves stop where they go under it, and the valleys are drawn (#466, thanks @14RL67).
+- An attic floor under a half-hip no longer pokes through the roof at the gables: walls whose roof lies below the floor there are left out instead of standing as stubs (#638, thanks @Kuddelsoft).
+
+## 1.24.0
+
+### Changed
+
+- **Modules run only after an administrator approved their code.** A module installed from the shop or from a file waits under Extensions → Modules until an admin opens **View code & approve** (publisher, version, size, fingerprint and the whole code) and approves it. A new release of a module never replaces the running code by itself: it waits beside it until it is approved too. Modules installed before 1.24 ask for this approval once. Furniture and feature packs without code are unchanged.
+- **Assist sentence files only on request.** NeonPlan no longer writes `custom_sentences/…/neonplan3d.yaml` on start: the file is written only when an admin picks sentences under ⚙ Settings → 🎙 Voice control (default: none). A file you changed yourself is never overwritten or deleted, and removing the integration removes NeonPlan's files. Files written by 1.22–1.23 stay as they are and are recognised as NeonPlan's.
+
+## 1.23.1
+
+### Fixed
+
+- An add-on that is not released yet showed in the list of Pro add-ons and in the pool's form; it is hidden again.
+
+## 1.23.0
+
+### New
+
+- **Furniture library 2.0:** the built-in models and every pack's items stand together, sorted by what they are (sofas, tables, cabinets, lights, appliances, …) instead of by pack. Room chips preselect the open room's kind, filter chips for linkable, lit and outdoor items, a picture and the size on every card, families of one item in several sizes as one card with size chips (an item for one side gets a chip for the other, placed mirrored), favourites and recently used at the top, and a search that knows everyday words ("lamp", "cabinet"). Pictures are drawn once and kept in the browser; very weak devices show the cards without pictures and keep the big hover preview instead.
+- **Pack format:** optional `group`, `room`, `tags`, `family` and `variant` per item tell the library what an item is and which sizes belong together (packs with these fields need 1.23).
+- **Free sizes with fixed parts:** a pack part may say which of its measures stay when the item is resized (`fix`: legs, arms, plates, handles) – a sofa stretched to 3 m keeps its 20 cm arms and grows its seat, a taller one keeps the seat height and grows its back. The packs get these marks with their next releases; packs without them scale as before.
+
+### Changed
+
+- **Card loader:** the dashboard card's loader is served from NeonPlan's own path (`/neonplan3d_static/`); nothing is written into the user's `www` folder any more. A copy older versions left in `www/neonplan3d/` is removed and the dashboard resource is moved by itself.
+
+## 1.22.1
+
+### Fixed
+
+- **Clock** (#642): the clock stood at the top left whatever corner was chosen – the corner styles were missing.
+- **Assist sentences** (#641): by default NeonPlan now registers only distinct sentences ("Zeig …", "Geh …", "Frag das Haus …", "NeonPlan, …", "Guten Morgen", "Gute Nacht"), so questions Home Assistant answers itself ("welche Fenster sind offen", "wo ist …") stay with Home Assistant. **⚙ Settings → Voice control → Sentences for Assist** switches to all questions or to none (the sentence file is removed). "Frag das Haus, welche Fenster offen sind" always reaches NeonPlan.
+- **Smart locks** (#645): the lock's pin at the door shows its text (locked / open) again – the symbol mode took it away; a terrace door (a window down to the floor) takes a lock too.
+- **Look Auto / Day** (#645): the day look keeps more of the shading and the hue, so furniture and devices stand out instead of washing out.
+- **Roof windows** (#645): their glass is as see-through as the windows in the walls, no more.
+
+## 1.22.0
+
+### New
+
+- **⚙ Settings menu in the editor:** everything that belongs to the whole plan – house (walls, grid, units, north), weather & warnings, live director, voice control, favourites, background, ground, backup and modules – sits in one menu in the toolbar; each topic opens as a dialog over the plan, also while something is selected. The side bar without a selection keeps the rooms, the floor-plan picture and help. The roof's shape, ridge, pitch and overhang moved to the roof tool; the start view is remembered in the 3D view's settings (📌).
+- **Modules:** NeonPlan can load code the shop delivers as a signed pack ("Modul von …" on the extensions page). The first module answers spoken questions ("Was ist offen?", "Wo ist es kalt?", "Läuft die Waschmaschine?", "Was zieht Strom?") in the house and out loud through the Assist pipeline's text-to-speech. Modules are checked and bound to the installation like furniture packs.
+- **Ask through Assist:** everything voice control understands can be said to a voice satellite, the Assist dialog or the app – the sentences (`custom_sentences/de|en/neonplan3d.yaml`, written on start) hand "Zeig das Wohnzimmer" or "Was ist offen?" to every open NeonPlan view; the first answer goes back to Assist, which speaks it where it was asked. The service `neonplan3d.ask` (text, screen, speak) does the same from automations and returns the answer. Views can carry a **screen name** (voice settings, card option `screen`) so a sentence reaches one tablet only.
+- **Further names** for rooms, furniture and placed devices ("Smart TV Pro" also as "Wohnzimmerfernseher" or "Glotze"), for voice control and the search.
+- Modules have their own home: **⚙ Settings → 🧩 Module** lists them and imports a module file; the extensions page gets a **Module** section of its own next to the furniture packs.
+- **Modules may draw:** a module adds water, pipe flows and device glows to the 3D stage, glass cards, warnings and fields in the editor's outdoor form, and lends the pipe tools their rules – the host draws, the module knows (`scene`, `cards`, `alerts`, `areaFields`, `pipes`, `watched`, `pools`; module kind `stage`).
+- **No restart for the frontend:** the bundles, languages and pictures are served with `Cache-Control: no-cache` – after an update of the files a reload of the page is enough (Home Assistant still restarts for its Python side); a 304 answers unchanged files.
+- **Second free module in the shop, Fenster-Wächter:** warns when a window stands open in the cold for 20 minutes or the heating runs with a window open (10 minutes); the room pulses, the voice answers "Welche Fenster sind zu lange offen?". Manual 7.5 lists the modules.
+- Module **Das Haus antwortet**, release 2: around forty kinds of questions – open things (also how long), temperatures, humidity and CO₂, thermostats, appliances and their time left (Haushalt Pro), media, energy, lights, blinds, locks, people and motion, warnings, today's household lines, plants, cars (Auto Pro), weather, sun and time, the house's rooms and sizes, the morning report ("Guten Morgen") and the night check ("Gute Nacht"), plus a little small talk. Hosts tell modules more of the house (household, warnings, cars, pools, weather, time left, thirsty plants).
+
+### Improved
+
+- **Smart locks on doors** (D636): a door gets its lock entity; a pin at the door shows locked or open (red while unlocked), a tap locks or unlocks.
+- **Radiators with a heat sensor** (D637): Tuya valves and others that report heating as a separate "work state" sensor glow with it.
+- **Clock in the view** (D631): date and time in a corner of your choice, per device in the view settings and as card option `clock`.
+- **Editor start floor** (D418): ⚙ House → "Start-Etage im Editor".
+- **Pinboard in "Heute im Haushalt"** (D628): a text helper's lines stand at the top of the household card – automations write into it.
+- **iPad / iPhone** (#635, #633): a finger on the house no longer swipes the dashboard to another view or back; the full-screen button spreads the card over the page where the browser has no full-screen mode (the Home Assistant app on iOS).
+- Look **Auto**: Day while the sun is up, Neon after sunset – in the view settings and as card option `theme: auto` (D623).
+- Editor: the side bar can be dragged wider or narrower at its left edge; the width is remembered (#620).
+- Electric furniture: an **extra value at the symbol** – a sensor (a gas boiler's water temperature) shown at the item's pin (D619).
+- Symbol mode **In the room**: an open room shows every symbol of that room, not only the important ones (D477, found by haddung).
+- Voice control: compounds are understood ("Auffahrtkamera" finds the camera "Auffahrt"); the voice settings list what NeonPlan understands, with the sentences of installed modules.
+- Voice control: a bigger microphone button.
+- Voice control: furniture can be asked for by its kind ("Zeig den Trockner"), its own name and everyday words ("TV", "Glotze", "Heizung", "Auto"), with or without an entity; a sensor called "Waschmaschine Leistung" answers to "Waschmaschine"; with several of a kind the one in the room named wins.
+
+### Fixed
+
+- Editor: a pool (or any smaller area) inside a lawn or terrace could not be selected with the select tool – the larger area caught the tap; the smallest area under the pointer now wins, like with rooms.
+
+## 1.21.0
+
+### New
+
+- **3D lock** (🔒 in the view settings, card `angle_lock: true`): the angle stays fixed, a drag moves the view, zooming still works – for wall tablets (idea from dlavrantonis' fork).
+- Looking through a camera: **⛶ Full screen** for the camera picture; where the browser cannot, Home Assistant's camera view opens (with sound) – idea from dlavrantonis' fork.
+- Room devices: a device's further entities (under "more") can be hidden (👁) or shown without state (Aa) on their own (D484).
+- **Ceiling fan with light** (Furniture → Lights): the light switches the lamp, a fan entity turns the blades with its speed; the fan gets its own symbol with its speed (tap: on/off, hold: speed). Blades only move while the fan runs, at a reduced frame rate (D606).
+- **Wi-Fi access point** (ceiling or wall): its ring glows blue while it is online and red when it is gone (its symbol then shows), with the number of connected clients; diagnostic entities like UniFi's can be linked (D582; casaNeon has one too).
+- **Water heater** (standing or slim on the wall): glows warm while it heats and shows the water temperature.
+- **Light switches and sockets** (Furniture → Home technology): 1–4 gangs in a frame, each with its own entity. A gang glows while it is on (a light in its colour, a socket green). A socket can also have a power sensor and then counts as a consumer. A tap switches the entity; several gangs open a small menu. The same entity may sit on several sockets, e.g. two sockets on one relay, or indoor and outdoor (#593, D523, D540).
+- LED strips can **rise** along their length (Rise °), e.g. up the stairs or along a handrail; light and glow climb with them (D539).
+- Live director: **own triggers** – any entity that goes on or open (a second doorbell, the garage door, a gate), each with its camera (D615).
+- Live director / look through a camera: an option **Live picture when looking through** shows the camera's video instead of a still every few seconds (D589).
+- Energy hologram: the bar is called **Self-sufficiency now** (it is the momentary value) and no longer shows 100 % when the grid reading is missing (D590).
+- Sloping walls: ◢ Sloping in a room's wall heights gives a wall its own height at each corner, the top runs straight between them; windows and doors stay under it (D569; NextFloor has it too).
+- Device symbols: a new mode **In the room** (none in the house and floor views, in an open room only its own; D477, D595) and a **symbol size** small / normal / large (panel display menu, card option `marker_size`; D596).
+- Ceiling lamps and LED panels can be lowered like spots (Height above floor), e.g. under a staircase.
+- Own background behind the 3D house: the look's sky (default), one colour, a gradient or a picture with a darkening veil (editor → Background; idea from damonxxu's fork).
+
+### Fixed
+
+- A lamp under a high worktop step (stairs built from worktops) jumped onto the step: what fits under a worktop from 1.2 m up stays on the floor (#614).
+- Washer and dryer glowed with a square patch over their round door; now a ring of light runs round the door (#516).
+- Roof windows shown over the room: the pane was opaque, so a closed blind was hard to tell; the pane is see-through now and the blind has slats like the wall windows' (#598).
+- Unloading the integration could fail on newer Home Assistant when no frontend script list was there (found by the new test run on the current Home Assistant).
+- Furniture packs: on Home Assistant 2026.9 and newer a pack with an item kind this version does not know yet showed "invalid content" instead of asking for an update (pointed out by hohoanganh).
+- Waste bins in the Blueprint and Day looks: the lower half fell back to the look's grey; coloured bins now keep their colour down to the ground (#609, thanks TheBhim).
+
+## 1.20.2
+
+### Fixed
+
+- Pool and pond values (pH, redox in mV, salt in mg/L or ppm, conductivity) were left out of rooms and areas; they count as sensors now (D600, found by Anrolosia).
+- Waste bins kept their colours only in the Neon look; in Blueprint and Day they turned blue or grey (#609).
+- Waste bins (Household Pro): a sensor showing a date ("on Mon, 26.10.2026", "28.10.", "29/10/2026") showed "in 2026 days" since 1.20.1 (and the day of the month before) – a date in the text is now read as a date.
+- Light wells: the **Light well** switch in the window form did not show for cellar windows without an own ground height (the editor measured the ground differently from the 3D view), so wells could not be switched off (D575).
+- Light wells: a balcony on the floor above lifted the well's rim up to itself – only areas on the ground count now (#602).
+- Floor opening not cut when the stairs below reach higher than the floor and their own hole, joined with the opening, reached past the room – now each opening is cut room by room and joined afterwards (#375).
+- Media card: ▶ after ⏸ was greyed out on players that can pause but do not report "play" (an Echo through Alexa Media Player) and sent nothing; it now resumes with play/pause (#400).
+- Voice control on Android tablets: the audio was taken before the tap had started it, so some WebViews recorded silence; and when only silence comes in (the microphone held by another app, e.g. Fully's acoustic motion detection), it now says so (#579).
+
+### Improved
+
+- Room bar order: ↑ and ↓ in the editor's room list move a room, and the room bar follows (D599).
+- Card option `roof: false` ("Show the roof" off) leaves the roof out altogether, as if the house had none (D601).
+- Outdoor areas like rooms: their device list in the editor has the room list's buttons – ☆ for the room panel without placing, 👁 hide, Aa without state (#597).
+
+## 1.20.1
+
+### Fixed
+
+- Old wall tablets (Fire 7 and other WebViews before Chrome 108): the NeonPlan page lost its height since 1.18.2 and showed an empty 3D view; the height for newer browsers now only applies where they know it. The editor's arrow keys no longer use a function those WebViews lack, and the build refuses such functions. Spotted in the CasaNeon fork (diegood).
+- Waste bins (Household Pro): a bin emptied every two or four weeks showed nothing when its next pickup was more than 10 days away – the calendar is now read six weeks ahead (#585).
+- Waste bins: a sensor whose text holds another number ("Restabfalltonne 2-wöchentlich in 4 Tagen") showed that number instead of the days (D576).
+- Waste bins: across the change to winter time the pickup day shown on a tap was one day early (D576).
+- Extensions: a Supporter-Pass holder whose key does not have a beta add-on yet saw "Become a supporter"; now it says the beta is theirs and to tell us on Discord, and a beta pack waiting on the key says to install it (#583).
+
+## 1.20.0
+
+### New
+
+- Outdoor areas like rooms (#100, #59): a lawn, terrace, balcony or pool with a Home Assistant area (and a name) is in the room bar, opens with its area's devices on a tap in 3D, is framed by the camera and shows its outdoor temperature with "Values"; in the editor its area's devices are listed to place on it.
+- Light between floors (#570): a lamp over a stairwell or floor opening, or close to it, also lights the floor below through the opening.
+- Live director (Camera Cockpit): a wall screen shows by itself what happens – the doorbell rings and the view flies to the door and looks through its camera; a camera sees someone; the washer is done; a new warning. Every event is its own switch, all off until switched on, and the screen is chosen too (this device, or the card option `director`); the view goes back afterwards unless someone touched the screen.
+- Voice control – new and still in development, released for everyone (opt-in per device or card option `voice`): a microphone button in the 3D view – "Show the living room", "upper floor" or just a room's name opens it; "Show the washing machine" / "Where is the floor lamp" flies to a device, "Show the front door camera" looks through it and "Show the cameras" opens the camera wall (Camera Cockpit); any other sentence goes to Home Assistant's Assist and its answer shows as a bubble. Speech to text by your Assist pipeline; needs https and the microphone allowed. "Test the microphone" checks a device step by step.
+- Pets walk around furniture instead of through it (sofa, table, cupboard), hopping onto their place on the sofa or bed at the end – idea from Thundras' fork.
+
+### Fixed
+
+- Furniture library: with the 3D view beside the plan, an item's preview picture showed beside or below the library instead of next to the item.
+- Manual (FAQ): NeonPlan closing on a two-finger move on iPhone/iPad is the Home Assistant app's own gesture – set it to None (#571).
+
+## 1.19.2
+
+### New
+
+- Motorised curtain: **Opens to** both sides, or only to the left or right (#511, wish of frops83).
+- Extensions: customers with a shop key who have not subscribed to the newsletter see a small box – signing up (double opt-in) brings the four taster packs (living room, kitchen, bedroom, bathroom, 4 items each) to their key; the shop sends the link only while they are not subscribed, "Don't show again" hides it.
+
+### Improved
+
+- Several packs that turn up at once (e.g. the four taster packs) are announced in one Home Assistant notification instead of one each.
+- The "new" badge on the Extensions tab only shows shop offers to customers who have bought something; gifts (fun and taster packs) do not count.
+
+### Fixed
+
+- Heatmap: the warm patch of sunlight under a window no longer covers a room's temperature colour (#558, thanks frops83).
+
+## 1.19.1
+
+### New
+
+- A garage door can follow a switch or input_boolean that drives it (on = open, a tap switches it) – idea from diegood's fork.
+- Motorised curtains (Architecture pack) open to both sides and the roll-down projection screen (Home cinema pack) rolls up and down with their cover's position; a screen can now be linked to its motor's cover; both take a live position sensor, a run time and "Reverse direction" (#511).
+
+### Fixed
+
+- Old wall tablets (Fire tablets with a WebView before Chrome 91, e.g. Fully Kiosk) no longer fail on the roof; the build now refuses code those WebViews can't run – reported in diegood's fork.
+- The room light on the floor reaches every wall: no dark strips along walls off the light grid, e.g. in L-shaped rooms – found by Thundras.
+- Background images and restore points are written to JSON outside Home Assistant's event loop on newer HA versions – pointed out by hohoanganh.
+- A flat roof no longer floats about 13 cm above the walls once it is fully shown (#556, found by Cle2301).
+- An awning already out, or a smart fridge door already open, shows so as soon as the card opens (#546).
+- A blind in an outer wall always sits outside, even when the window was filed under the neighbouring room (#542).
+- A gate or garage-door cover on a door moves the door's leaf instead of drawing a roller shutter over it (#544).
+- The supporter code's copy button copies the code alone, and the hint explains how to use /supporter in Discord.
+
+## 1.19.0
+
+### New
+
+- Awnings: folding-arm, drop-arm, vertical/ZIP, pergola/conservatory, side awning; run out and in with their cover (D170, D274, D502).
+- Waste bins and mailboxes for everyone (Furniture → Household): bin shapes, colours by country, mailbox shapes.
+- Household Pro (beta, first for supporters): bins from the waste calendar or a sensor with tags on their lids, post in the mailbox, thirsty plants, time left and "done" of washer, dryer and dishwasher, services due, fridge door warning, smart fridge, glass card "Today in the household".
+- Import page (beta): plans from Sweet Home 3D, RoomPlan scans, DXF, glTF/OBJ/STL, Floorplanner, Valetudo and an AI format to a NeonPlan file in the browser.
+
+### Improved
+
+- Colour pickers show their colour as a swatch.
+
+## 1.18.2
+
+### New
+
+- Light wells: per window off (*Light well*) and *Rim above the ground* (#524).
+- A solar string can end at a battery with its own solar input (power station) (D410).
+- Right (or middle) mouse button pans the plan; a right click without moving still opens the menu (D518).
+- Furniture width and depth down to 1 cm (D520).
+
+### Fixed
+
+- Sound rings on upper floors floated above the speakers (#521).
+- Energy cards' day curve stopped after the view left the page once; refresh on tablet wake; no drop to zero at the end (#527).
+- Daylight under roof windows also when the sun is on the other side or low (D340).
+- Pets sank into rugs, a dog lay half in the sofa, too little wandering (D507).
+- Double click on a cable point removes it (D410).
+- Cylinders lying along the depth looked hollow from the front, and one end of every lying cylinder was missing – e.g. the round mirror with light, a camera's lens (#534).
+- Floating roof windows in a slope over a lower floor's room show with that floor when the roof fades (#482).
+- A light well under a lawn, path or terrace drawn up to the house stands just above that surface instead of vanishing under it (#524).
+- The furniture type list offered devices of the energy tool and parts not released yet; it now offers what the library offers (#530).
+- The sidebar panel was taller than the window with themes that set safe-area insets (#529, thanks @brentgl).
+
+## 1.18.1
+
+### New
+
+- **Fun pack Halloween** released: 13 decorations and a ghost floating through the house (switch under Extensions, card option `ghost: false`).
+- **Fun packs free with every customer account** (Halloween and Pets): with a licence key they wait under Extensions to install; without one, a free account brings them. A one-time notice in the 3D view; the pets' old shop notice is gone.
+- **Chinese (Simplified) and Portuguese** as app languages (config flow too: zh-Hans, zh-Hant, pt, pt-BR).
+- All 16 extra languages complete with the texts of 1.18.
+
+## 1.18.0
+
+### New
+
+- **Cellar and ground:** section *Ground* in the editor – ground height (semi-basement), cellars shown in the earth (building-pit view when opened), plinth under a house above the ground.
+- **Cellar window** button (100 × 50 cm, 25 cm under the ceiling); light well with a grate below the ground.
+- **Tidier editor toolbar** in groups without emojis: Select, Build ▾, Outside ▾, Furniture, Energy, ↶ ↷, 3D beside, Wall view, Whole plan.
+- **Floor menu** on the far left of the toolbar in every tool: switch floors, add a floor (also from HA floors), floor settings.
+- **Tools stay in use** after placing a door, window, room, outdoor area or floor opening (Esc or Select ends them).
+- **Collapsible sidebar** in every layout; another tool unfolds it again.
+- **Whole plan** (formerly *Show all*) fits the garden too while drawing outdoors.
+- **3D view:** switches in one *Show* menu, header options behind the ⚙ on every screen.
+- **Extensions tab badge** ("2 ready", "3 new"); new packs in the account announced once in HA notifications.
+
+### Changed
+
+- *Lock floor plan* moved to the floor settings (still in a room's right-click menu).
+
+### Fixed
+
+- UniFi cameras folded under another entity of their device (#517).
+- Front door sidelight frame, mullion and glass plane (#519).
+- Media buttons the player cannot serve are greyed out (#400).
+- Flickering corner bathtub, outdoor kitchen and network rack (pack updates Bath R4, Garden R4, Smart Home R3) (#516).
+
+## 1.17.2
+
+### New
+
+- **Air conditioner (wall)** item with a glow in the colour of its mode (heat red, cool blue, auto green, dry yellow, fan white).
+- **Cooktops glow** while they cook (built-in stove and the Kitchen pack's hobs and cookers); operating-state sensors (`run` / `ready` / `inactive`) supported. Kitchen pack R4: no zone painted red for ever.
+- **Lamps in one colour only** (*Glow in one colour only*): a colour light used as a signal shows only that colour.
+- **Running from (watts):** own power threshold for appliances behind smart plugs (default 10 W).
+- **Roof windows in the room card** and sunlight through them (#482).
+
+### Changed
+
+- Roof windows fade out with the roof again; *Show over the room without the roof* keeps one over its room (#482).
+
+### Fixed
+
+- Weather outside switched off stayed on after a reload (panel and card) (#509).
+- Echo speakers: play after pause works while the speaker still reports playing (#400).
+
+## 1.17.1
+
+### New
+
+- **Pets (fun pack, a present):** cat, rabbit and five dog breeds walk through the house, take the stairs, rest on sofas and beds, stop at shut doors (contact sensors), sleep at night; fish in the Pets pack's aquariums. Free in the shop for customers; *Extensions → Fun packs*, card option `pets: false`, a one-time note in the editor.
+- **Extensions page:** the shop's packs and the installed packs fold into summary bars (installed, updates, missing) with *Install/update all*.
+- **Wall view zoom:** mouse wheel towards the pointer, two fingers, ＋ / − / ⤢ and arrows in *Wall from the front*.
+- **Pools with depth:** basin depth and rim above the lawn; see-through water onto the basin's walls and floor (when the pool lies in a lawn or other area; without ground around it, it stays flat).
+- **Terrace doors** can open outwards (*Reverse opening direction*), sashes swing outside in 3D (#492).
+
+### Fixed
+
+- **Robot vacuum with dock** (Smart Home pack): current-room sensor, auto link and driving in 3D like the built-in robot (#470, #490).
+- **Smoke detectors** take binary sensors; other items alarm-class binary sensors (#490).
+- **Roof windows** stay in the slope when the roof fades over a floor or room; closed rim between roof and frame (#482, #490).
+- **Wall view:** Del no longer reaches the item chosen in the plan behind it.
+- **Pool warnings** no longer make every room pulse; they show at the top only.
+
+## 1.17.0
+
+### New
+
+- **Furniture blocks:** Shift + click (or *Select several* on a tablet) and Shift + drag (a frame) select several pieces; move, turn about their centre, copy, fix or delete them together, or **join them into a block** – a click on any part then selects the whole kitchen or wall unit, a double click edits one part alone, *Break up block* undoes it. Blocks move together in 3D beside the plan too. Ctrl+D duplicates the selected furniture.
+- **Wall view:** blocks there too (shift-click or a frame, join, drag the whole block along the wall, *Whole block / This part only*); the side bar **Onto the wall** shows a few categories, a search and recently used pieces instead of a long list – tap a free spot on the wall and it offers only what fits that gap, cabinets built to measure taking its width. Pieces can be resized in the wall view: handles left/right (width), top and bottom (height), snapping to neighbours, width and height to type in; picture tiles in the side bar, delete button and Del key, blocks in 3D in the room too. A block with a fixed part stays put everywhere and says so, with *Release all*.
+- **Time travel for everyone:** out of the supporter beta; what a placed camera detects (motion, person, car) is an event day and night.
+
+### Fixed
+
+- **Lights:** effect names that are a light's mode (white, colour, rgb, manual, default) no longer start the colour effect in 3D (LocalTuya bulbs).
+
+## 1.16.0
+
+### New
+
+- **Walk through the house:** the 🚶 Walk button (top right) puts you at eye height into a room; drag to look, tap the floor to walk there (through doors), W A S D / arrows or a touch stick; walls stop you; `walk: false` hides it in the card.
+- **Thermostats as room temperature:** a room without its own temperature or humidity sensor takes its thermostat's `current_temperature` / `current_humidity` (room cards, heatmap, room panel); thermostats can be chosen as the room's sensor (#478).
+- **Energie Pro:** a side bar in the wall view puts the meter, inverter, home battery and wallbox straight onto the wall shown.
+
+### Fixed
+
+- **Dashboard card after a restart** stayed on "Configuration error" when opened while Home Assistant was starting: the card resource is now a loader in `www` (served from the start) that tries again; the static path is registered in `async_setup` (#461).
+- **Several speakers on one player** (Sonos group, stereo pair) all show playing (#475).
+- **Robot vacuum room:** more cleaning states, the vacuum's own room attribute as a fallback (#470).
+- **Glass card ▶/⏸** send `media_play` / `media_pause`; buttons act on pointer up or click, once (#400).
+- **Light through doors** on a wall line shared by several rooms goes into the right room (#444).
+- **Sun patches** run on into rooms joined without a wall (#455).
+- **Camera wedge** stops at a wall next to the camera (#438).
+- **Drop-down lists** keep the dark look when opened.
+
+## 1.15.0
+
+### New
+
+- **Wall view:** **▦ Wall view** in the furniture form, in the right-click menu or beside each wall under *Wall heights* shows the wall from the front with its doors, windows and the furniture on it; drag pieces along the wall and (when they hang) up or down, with dimension lines and snapping; 3D in the room (camera in the middle of the room at eye height, everything in the room, tap and drag, wheel to walk closer) or the flat front view with the furniture as a real front view; arrow keys 1 cm / Shift 10 cm; arrows left and right turn to the joining wall.
+- **Furnishing in 3D:** a dragged piece stays wholly in its room and stops at the wall (no more sliding into it and jumping on release); pulled a little away from the wall it no longer snaps back; tall pieces seen almost level (fridge, oven tower in the wall view) move forward and back evenly.
+- **Wall view:** the chosen piece shows its lock (🔒 Release / 🔓 Fix) – a fixed piece cannot be dragged, which was not visible there; in 3D a TV's screen and picture and a smart fridge's doors grab their piece too.
+- **Wall view:** turn the chosen piece by 45° or by degrees (turned at a wall it moves back into the room); after **▦ Wall view** in the toolbar a click anywhere in a room opens it (near a wall: that wall).
+
+### Fixed
+
+- **"Height above the floor"** takes at most 10 m like the backend – "40" meant as centimetres made every save fail; a stored height above it is set to 10 m when saving.
+
+## 1.14.0
+
+### New
+
+- **Energy Pro: gas and water.** In the energy balance you can choose a **gas meter** and a **water meter** (or take them over from the energy dashboard); the house card shows today's use – "Gas 2.2 m³ · Water 238 l today".
+- **A Pool tool of its own:** pools are now drawn with their own tool in the editor.
+- **Outdoor: choose what to draw first** (lawn, terrace, path …) at the top of the Outdoor tool.
+- **Pool shapes (free):** rectangular, round, oval or free, chosen before drawing; round and oval pools resize at the corners of their box (a circle stays round) or by diameter / width and depth; **above-ground pools** with their own height.
+- **Rain warning per window:** the tick **No rain warning** in a window's form – for a window under a canopy; all others still warn (idea D328 by Thundras).
+- **Rain from your own weather station:** choose a rain sensor or a rain rate (mm/h) in the settings; then the rain at the house counts instead of the forecast – for the warning and the rain in 3D (idea D407 by Kuddelsoft).
+- **Balcony:** a new outdoor type for upper floors – a thin slab at the floor's level, a see-through railing of bars with its own height, no railing along the house wall so the balcony doors stay in view (#253 by pzmd739-ui).
+- **Time travel (beta): power outages** now show as an important event on the timeline – from the sensor chosen under "Report a power outage with" (Mavyre in the beta forum).
+
+### Fixed
+
+- **Commands from glass cards** that Home Assistant refuses now show its error message at the bottom instead of failing silently (#400).
+- **A pool inside a lawn** was hidden by the lawn; every pool now cuts itself out of the area around it.
+- **Klang & Kino glass card:** ⏮, ▶/⏸ and ⏭ now act when the finger lifts – on some tablets the tap got lost while a speaker played (#400 by domodial).
+- **Full screen fills the whole screen** – an empty strip stayed at the bottom (#426 by rolandarends); **"Fill the screen"** reaches the bottom edge, also in kiosk mode without the header (#344 by djbassmind-sketch, cause found by sjess).
+- **Editor:** the lengths on upright room edges stand beside the "+" instead of under it (#431 by Maddin2020).
+- **The grid under lawns and paths** showed through when zoomed far out (#427 by 1970lexi).
+
+## 1.13.3
+
+### Fixed
+
+- **Saving a start view after several turns** failed with "… theta"; the angle now counts once round, waiting changes save again (#416 by rolandarends).
+- **Glowing edges at wall corners** no longer flicker, shorten or stick out as the view turns (#417 by rolandarends).
+
+## 1.13.2
+
+### New
+
+- **Shorter warnings:** Editor → Settings → **Show device names in warnings**. Switched off, the banner reads "Guest WC · Window open in the rain" without the device name; a warning without a room keeps it. On by default (#374 by sjess).
+
+### Fixed
+
+- **Ceiling height per room:** the glow points of ceiling, panel and pendant lamps sat at the floor height and floated above the lamp in a low room beside a taller one (#372 by wiesi12).
+- **Colour effects of lights that report no colour** (e.g. Nanoleaf during an effect) run through real colours instead of staying white (#373 by sjess).
+- **Ceiling height per room above the floor height:** a vaulted room open to the roof (e.g. 4.5 m in an attic of 2.35 m) – its pendant and ceiling lamps now hang from that ceiling or from the roof underside above them instead of stopping at the floor height (#379 by Twilight-Networks).
+- **Room buttons without a name:** a room whose name is empty no longer leaves an empty button in the room bar (#370 by pepeelpl).
+- **Car Pro – lock:** the lock role also takes a text sensor like BMW's door lock state (`LOCKED`, `SECURED`, `UNLOCKED`); a binary sensor of class lock now counts "on" as unlocked, as in Home Assistant (#369 by ElVincenco).
+- **Doors and windows in free walls outside the rooms** (outer walls drawn with the wall tool, rooms without walls of their own) now open and close with the contact chosen for them (#367 by ge8020).
+- **Outdoor light:** neighbouring outdoor areas no longer get brighter seams under a garden light, and a lowered or sloped bed is lit along its own surface instead of showing as a bright patch (#341 by 1970lexi).
+
+## 1.13.1
+
+### New
+
+- **Feet and inches:** Editor → Settings → **Lengths**: Automatic (follows Home Assistant's unit system), Metres or Feet and inches. Every length field, dimension and area (ft²) in the editor follows, and you can type `8' 2"`, `98in`, `8.2ft` or `2.5m`. The plan still stores metres (discussion #117 by Valkster70).
+- **Outdoor areas as a free form:** in the Outdoor tool, choose **▭ Rectangle** or **✎ Free form** beside "Undo" and place the corners one by one – curved beds, slanted plot borders, an L-shaped path (#97 by rolandarends).
+- **Ceiling height per room:** a field in the room form; the room's walls end there (unless a neighbouring room is taller) and its ceiling lamps hang from it – a 2.5 m living room beside a 5 m garage on the same floor (#30 by wiesi12).
+- **Ceiling lamps under a sloped roof** hang from the roof's underside instead of floating above it (#168 by denisb88).
+- **Net area:** the room form shows the drawn area and the net area – without the half of each shared wall in the room, free walls, and the gap behind a wall built in front of another (#216 by idaho).
+- **Power outage warning:** Settings → **Report a power outage with** – a grid sensor, a UPS on battery, a mains voltage or a helper of your own. The warning shows in the alert bar, and the grid connection of Energy Pro is crossed out (#214 by Mavyre).
+- **Energy Pro: house balance and plant cards in floor views too** – a switch in Editor → Energy → Hologram, off by default (#193 by denisb88).
+- **Cameras: detection symbols can be switched off** – then only the field of view turns red on a detection (#267 by RobertSorgenfrei).
+- **Straighten slanted edges:** a button in the floor form beside "Close gaps" finds room edges that are only a few centimetres off straight (a corner 1 cm out makes slanted walls in 3D) and straightens them in every room that shares the corner. Walls drawn slanted on purpose stay (#333 by ciechompl).
+
+### Fixed
+
+- **Floor openings across a room line** are cut in every room they cover; before, an opening reaching into a second room was not cut at all (#353 by tomfischer98).
+- **Hip and pyramid ends** say "Hip" in the solar field's face list, so they are easy to find (#302 by cereal2nd).
+- **Fill the screen / full screen on tablets:** the card measures the visible screen height and where it starts, so no black bar is left at the bottom – e.g. in the Home Assistant app on Android tablets in landscape or with a hidden header (#344 by djbassmind-sketch).
+
+## 1.13.0
+
+### New
+
+- **⏪ Time travel (Pro, supporter beta):** replay up to 7 days in your house from the history Home Assistant records anyway – lights with brightness and colour, doors, windows, blinds, motion, heating, TV and speakers, energy flows, the car, the robot vacuum's way, weather and the sun. Play it at several speeds right up to the present, jump between events, see **"while you were away"** and a **day summary** per room compared with the day before. View only – nothing is switched, and the places and phones of people are never loaded. Runs on old wall tablets too (they start with 24 hours).
+  - **Supporter beta:** time travel comes with the **Supporter Pass** first. Supporters test it and give feedback on Discord; once it is finished, everyone can buy it on its own. Under *Extensions* it is marked "Beta · supporters first".
+  - Supporters find their **Discord code** under *Extensions*: typed into `/supporter` on Discord, it unlocks the supporter beta channels.
+- **Free furniture:** corner sofa (L), large U-shaped sofa and a **U-stair with landing** that cuts the opening into the floor above (#61 by daene85).
+- **Hologram settings without solar fields:** mirroring, device cards and size are reachable in Editor → Energy → Hologram even without a solar field (#334 by netrunnercs); every plant card of an inverter can be moved sideways or up (#335 by RobertSorgenfrei).
+- **Free form shows lengths:** while drawing, every edge and the one to the pointer show their length (#351 by Ollywood71).
+- **Free walls with X/Y fields** to place them exactly, off the grid (#315 by rolandarends).
+- **Recessed and surface spots: "Height above floor"**, e.g. under wall cabinets (#311 by rolandarends).
+- **Doors and windows: "Invert contact"** for sensors that report the other way round (#329 by pepeelpl).
+- **Doors are easy to pick again:** a wider tap area in the plan, and the room form lists its doors and windows (#312 by Chase295).
+- **Room ID in the room form** – tap copies it, for the card option `room:`.
+- On phones a one-time hint says drawing works best on a PC or tablet.
+
+### Fixed
+
+- **Garage doors** read their contact like doors now (#329 by pepeelpl).
+- **Solar modules on short walls** are drawn, and walls in the list have clear names like "Hall 4–5 · East · 1.2 m" (#295 by rolandarends).
+- **Cable routes** end with a right angle at the device instead of running slant (#256 by Kohhal).
+- A new parking spot faces the garage door of its room; the room panel no longer covers the switch bar.
+
+## 1.12.7
+
+### New
+
+- **The wall view is remembered:** "Tall walls" or "Cut" stays as you left it after a reload – in the 3D view, in the editor's 3D pane and on the dashboard card, per device (#309 by rolandarends).
+- **Controls on the right:** the floor pictures, star, search and eye can sit on the right instead of the left – header ◧ / ◨, on the card `controls_side: right` (#285 by fammastrodaiuto).
+- **Keep the view on floor switches:** header ⌖ – switching floors keeps the camera where it is, only its height follows; on the card `keep_view: true` (#191 by denisb88).
+- **Device holograms** (Energy Pro), all in Editor → Energy → Hologram:
+  - **Hide device cards below (W)** – e.g. 1 W, so a card disappears while its device is off (#244 by denisb88).
+  - **Device cards in the house view too** – switch them off for the house view, they stay on their floor (#226 by denisb88).
+  - **Device cards in an opened room** – shows the cards of a room's devices when you open it (#235 by denisb88).
+- **Own buttons light up** in the star menu while the entity they work on is on (#188 by RobertSorgenfrei).
+- **Downstand beams and ceiling beams** (Architecture pack) have a height above the floor now, e.g. to lower them under a sloped ceiling (#287 by RufusRed80).
+- The mouse wheel over a hologram card zooms like anywhere else in the view (#239 by denisb88).
+
+### Fixed
+
+- **Flickering green strips in passages** ("opening without a door"): gone (#290 by itsKXCode).
+- **Lamp light shining through a wall** inside a room (a drywall partition, the inner corner of an L-shaped room) – the light now stops at walls and still passes through doors and openings (#300 by idaho).
+- **Solar modules on short walls:** walls from 0.5 m are offered, e.g. a 0.92 m garden wall (#295 by rolandarends).
+- **"Back to a device pin"** on a lamp turned it into a lamp again on the next load.
+- Pro add-ons without furniture no longer show as empty sections in the furniture library and the furniture type list.
+
+## 1.12.6
+
+### New
+
+- Start view per room: angle, zoom and framing; tapping the room in 3D flies there (#282 by RobertSorgenfrei).
+- The start view of the house and of a floor also remembers the point the camera looks at (#206 by janoschbatschi).
+- Settings: switch for the sunlight patches through the windows (#266 by ciechompl).
+- Hologram settings: switch "Mirrored from behind (like glass)", on by default (#271 by barney798).
+- Discord community, linked in the editor's help section and on the Extensions page.
+
+### Fixed
+
+- Select fields in the editor kept showing the value of the item before after switching items.
+- Robot vacuum with dock (pack) offers vacuum entities and glows while cleaning (#273 by ElVincenco).
+- Motorised curtain (pack) can follow a cover entity and glows while open (#286 by frops83).
+- Heatmap legend: no wrong "no matching sensors" line on the first tap; it sits above the star button.
+- "Add rooms from HA areas" shows the number in brackets.
+- Online demo: no grey boxes for furniture of packs the demo does not have.
+
+## 1.12.5
+
+### Fixed
+
+- **Saving failed** after setting an outdoor area's height or slope back to 0 ("expected float at …outdoor[…].offset") – it saves again; changes kept in the browser can be taken over (#242 by rolandarends).
+- Pergolas with a slope: the beams and rafters follow the slope instead of lying level (#242).
+- A hub device for the whole house (one MQTT or KNX device whose entities lie in several areas): its room thermometers count for the room climate again, and a power sensor only goes to an entity in its own area instead of the first device placed; a binary sensor without a class shows up when it was given an area by hand (#243 by bert-MI4U).
+
+## 1.12.4
+
+### Fixed
+
+- Dashboard card: right after starting the app, the card could show "Custom element doesn't exist: neonplan3d-card" until the sidebar page was opened. The card's script is now also kept in the dashboard resources (storage mode), so dashboards wait for it; an older copy of the script there is pointed to the current one (#252 by TheRev-ha, RobertSorgenfrei).
+- Installing a Pro add-on from the shop: NeonPlan 3D now also sends its version in the request, so the shop can answer an installation that is too old with a readable "please update first" message.
+- Energy Pro in a house with a single floor: the plant cards (solar, balance) show in the 3D view and the card, not only in the editor (#255 by Kohhal).
+- Energy Pro: a grid connection mounted on a wall – the grid cable starts at its height instead of on the ground, and its pin sits there too (#256 by Kohhal).
+- Solar fields moved to another roof face (e.g. after replacing a flat roof) keep their modules – rows, columns, format and tilt – instead of starting again from a proposal (#258 by rolandarends).
+- "State from" (occupancy mats, a lit top while something is on) is offered for every piece of furniture again, also a plain bed or armchair – it only showed for electric furniture (#116 by hahne-t).
+
+## 1.12.3
+
+### New
+
+- **Nine new languages:** Danish, Swedish, Norwegian (Bokmål and Nynorsk), Finnish, Czech, Polish, Romanian and Slovenian – 16 in all; the Norwegian one builds on the translation by zanzei26 (#233).
+- The integration's setup dialog is translated into every language.
+
+### Fixed
+
+- French, Spanish, Dutch, Italian and Hungarian: the restart notice shows both versions again.
+
+## 1.12.2
+
+### Fixed
+
+- A roof section whose eaves lie below a floor's ceiling now cuts that floor's walls, even when its wall top is set to the ceiling height (discussion #147 by twynne and wouter-b).
+- A house with a single floor shows its roof in 3D; an extra attic floor is no longer needed (discussion #208 by Kohhal).
+- Installing a Pro add-on that is newer than the installed NeonPlan 3D now says "please update NeonPlan 3D first" instead of a cryptic error (#218 by twynne).
+- Camera Cockpit: the camera wall fits any number of cameras – the grid picks the columns that give the largest tiles, nothing overlaps, and with very many cameras the wall scrolls (#217 by denisb88).
+- Solar fields: the inverter choice shows each inverter's own name (or its entity's name), and an inverter shows which strings feed it (#213 by rolandarends).
+- Garden solar fields stand on the ground floor, no longer on a cellar below it (#192 by denisb88).
+- Extensions: our furniture packs and Pro add-ons show English names when Home Assistant is not set to German (#224 by twynne).
+- Furniture with only a small status light (3D printers, wallbox, speakers) links as a device, no longer as a "TV / media player".
+- Energy Pro: tapping the grid pin at the street opens the grid sensor instead of an empty "grid" dialog (#223 by denisb88).
+- Entity choices say how many more entries there are ("… +23 · type to search"); for a parking spot's presence, GPS trackers (the car's own integration, a phone) come before a router's many network trackers (#227 by twynne).
+- The star menu closes when you tap into the 3D view, on a room or switch floors; while the search is open the eye button steps aside (#220 by daene85).
+- Pulled apart, a roof rides with the highest floor beneath it, so a loft under the same slopes stays under the roof; dormers go along with their roof (#202 by Kuddelsoft, discussion #207 by 1970lexi).
+- Under a roof slope the light on the walls ends where the wall does, instead of shining through the roof (#201 by Twilight-Networks).
+- Walls under a roof no longer show vertical stripes (discussion #180 by RobertSorgenfrei).
+- With the temperature, humidity or CO₂ view on, garden lamps keep their light and room lamps a soft glow (discussion #205 by 1970lexi).
+
+## 1.12.1
+
+### New
+
+- **Ruler and straighten for the background picture:** tap the start and end of a stretch of known length and enter its real length – the picture is scaled right; **Straighten** turns a skewed scan by two taps along a wall; **Move, scale and turn** gives the picture handles like furniture – drag, scale at the corner, turn at the round handle; **Done** fixes it again (#183 by HardstylerDN).
+- **Glow per lamp in 3D:** a percent field on lamps and placed lights tones down bright LED strips or lifts weak lamps – display only (#181 by RobertSorgenfrei).
+- **Start view per floor:** each floor can open from its own side, e.g. the ground floor from the front and the upper floor from the back (#182 by RobertSorgenfrei).
+- **Fold the floor pictures:** a small arrow turns the floor pictures on the left into plain buttons with names – more room on a phone (discussion #177 by Eric-41).
+- **Energy Pro:** smart plugs and other placed devices with a power sensor can carry a device card too; cards of devices standing side by side no longer cover each other (discussion #178 by jan-1992-29, karli4711).
+- **Car Pro:** when the car is unlocked, its head- and taillights glow amber like indicators.
+
+### Fixed
+
+- Where an interior wall continues an outer wall in line, it stood half its thickness into the room; it now sits flush (#179 by gcorgnet).
+- Demo: the van stands along the garage instead of across its wall.
+
+## 1.12.0
+
+### Fixed
+
+- A roof section drawn over an upper floor with a gap in its middle (a stairwell) landed on the ground floor; the wall top is now found at nine points, and the roof form gets **Sits on floor** to move a section onto another floor (#166 by speedymk1).
+- Helpers could not be picked: number fields now offer `input_number` and `number` helpers, on/off fields `input_boolean` – for solar, energy, the car and contacts (#161 by vwtuner).
+- Outdoor lamps lit nothing once two rooms of the floor were joined into one light zone (#160 by Thundras).
+- Mirrored furniture showed its inside faces; only lying cylinders and the contact shadow are rewound now, the smart fridge's doors and screen and pack lamps (arc lamp, wall unit) follow the mirror (#159 by Thundras).
+- The state picture of a screen furniture sat below the screen when a mount height was set, and changing only the mount height did not move the glow (#157 by Thundras).
+
+### New
+
+- **Glass wall:** a new preset under doors & windows – fixed floor-to-ceiling glazing with slim mullions for an indoor glass wall (#163 by xFireShade).
+- **Show a device as furniture:** a placed device turns into a fitting furniture item in its place, already linked (a speaker or smart display for a media player, a lamp for a light …), and back to a pin.
+- **Sound & Cinema, more life:** the quick menu gets **Play** with your stations and playlists (set in the editor, `media_player.play_media`, also for Echos via search phrases) and the player's sources; a speaker's pin steps aside while its card floats; players without a title show their app or source; one card per player, furniture linked by hand first; cards survive short cloud dropouts; the volume answers while dragging.
+- **Home Cinema & Hi-Fi pack, release 2 (free for owners):** 13 smart speakers and smart displays (ball, cylinder, puck, pod, tall, oval, compact and portable multiroom, premium soundbar, displays 5″/7″/8″/15″); with Sound & Cinema their light ring glows in the app's colour and the displays show the cover.
+- **Own buttons:** in the central menu, with a label, an icon and an action – open a path, show an entity's details, call a service, or fire a DOM event for a browser_mod popup with your own card; set in the editor under Favourites or per card with `buttons:` (discussion #143 by Schobiwan88).
+- **Phones: a shorter header:** quality, look, markers and FPS fold behind a ⚙ button, two header lines instead of three (#131 by denisb88).
+- **Living room pack, release 3 (free for owners):** a wall unit with lit glass vitrines – as a lamp, a linked light makes the vitrines and LED strips glow, your own TV goes into the niche – and a wall unit with a TV whose screen shows the media player (discussion #153 by Pitbull19850119).
+- **Thickness per wall:** every wall of a room gets a thickness field in the wall-heights box (a 36.5 cm outer wall, an 11.5 cm partition); a shared wall takes the thicker setting (discussion #149 by ArtakerCadSystems).
+- **Central menu and favourites:** a star above the magnifier opens all lights on / off and all blinds up / down for the floor shown or the whole house (with a confirmation), plus favourites – scenes, scripts, automations, buttons and switches picked in the editor; the room panel gets **All on** next to All off and **All up / All down** for its blinds; card option `central` (#145 by daene85).
+- **Names under markers:** a device or furniture with an own name can show it small under its pin in 3D ("Show the name under the marker"), or every named device with the card option `marker_names: true` (#156 by denisb88).
+- **Solar on hip ends:** hip and pyramid roof sections offer their two triangular ends for solar fields and roof windows (discussions #158 by bert-MI4U and #134).
+- **Better furniture search:** several words in any order, German and English names and the pack name, a "nothing found" line, the field stays on top while scrolling, Escape clears it (discussion #155 by biancapascal).
+- **Hide a state in the room panel:** per device of a room ("Aa"), and a bare "unknown" of switches, covers and lights is left out anyway (discussion #154 by ggeudens).
+- **Outdoor round:** a **slope** per outdoor area (height difference and direction; fences, lamps and furniture on it follow, #148), **holes** – an area marked "cut out" becomes a hole in the areas beneath it (#144), a **pergola / frame** type with corner posts, beams, rafters and optional **X-bracing**, an **open** outline for fences and pergolas leaning against the house (#141), and a **wild patch** type (#142); all by denisb88.
+- **Garden & Terrace pack, release 3 (free for owners):** trees by species – oak, lime, birch, maple, fruit tree – conifers – spruce, pine, thuja – plus shrub, flowering shrub, brush for a wild patch and a group of three trees; the demo garden shows them (#142 by denisb88).
+- **Car Pro (Pro add-on, €5.90):** a glass card over the car (charge with a bar, range, charging power, lock / climate / charge buttons); the car in its parking spot shows charge, range, charging, lock and climate from its integration – a light band in the charge colour, a warm glow while the climate runs, a pin with percent and kilometres, "away" with the tracker's zone, and a quick menu with lock/unlock (unlocking asks), climate and charging; one entity of the car is enough, the rest is found on its device (discussions #71 and #73, #16 by tomfischer98).
+- **Sound & Cinema (Pro add-on, €3.90):** speakers show a now-playing card with cover, title, artist and volume (play/pause, previous, next on it), sound rings pulse around playing speakers, multiroom groups are joined by lines, and the quick menu of a media player gets play/pause, track change and volume (discussion #6 by MisterAndrew3000, the most-voted idea).
+
+## 1.11.1
+
+### New
+
+- **Values at the room names:** a heatmap mode "Values" writes temperature, humidity and CO₂ under each room name instead of colouring the floors (discussion #153 by Pitbull19850119).
+- **Slats:** the quick menu and the room panel show a tilt slider (or slats open/closed) for covers that support it – Raffstores, venetian blinds (discussion #146 by Schobiwan88).
+- **Hide entities from the room panel:** an eye in the room's device list keeps an entity of the area out of the panel (discussion #152 by ggeudens).
+- **Height offset for outdoor areas:** a driveway down to a lower garage or a raised terrace sits below or above the ground; lamps on it follow (#148 by denisb88).
+- **Shift and turn the whole house:** "Take every floor along" moves or turns every floor with the roof, outdoor areas, cables, meter and hologram (discussion #140 by robertkrizovnik).
+- **Background picture:** move and scale it in the plan (drag it, pull the corner handle) and turn it with a rotation field.
+
+### Fixed
+
+- Device holograms (Energy Pro) sat at the wrong height on floors above or below ground – the floor's elevation was left out (#151 by fschade).
+
+## 1.11.0
+
+### New
+
+- **Hedges and fences take a height** of their own, and every outdoor area can hide its neon outline (#141 and #144 by denisb88).
+- The card option for the energy values at the top says that it belongs to Energy Pro (discussion #104).
+- **The eye – a clean view:** a button at the bottom left of the 3D view hides every bar, chip row, thumbnail, value and switch so only the stage remains (half a screen more on a phone); the next tap brings them back, and the device remembers the choice. Card options `controls_hidden` and `controls_hide_after` (seconds without a touch) (#131 by denisb88).
+- The installed version stands at the right end of the panel header (hover it for the integration's version).
+- **Accent colour of your own:** a colour well beside the look (and the card option `accent`) recolours the neon lines and glowing edges, the buttons and the pins – amber, green, purple, whatever fits the wall (discussions #32 by hohenpul and #102 by MrSideline).
+- **Furniture with a state:** any item can show an entity that reports on, occupied or home – its top glows; two entities light the halves of a bed (left/right) or a bunk bed (bottom/top) (#116 by hahne-t, discussion #11 by StevenKRT).
+- **Lamps: colour and brightness from a second entity** – for lights a relay switches while the bulb knows its colour (discussion #132 by Schobiwan88).
+- **Cut view cuts tall furniture:** wardrobes, stairs and tall units are cut at the wall cut height, so a stair in the middle of the house no longer hides the rooms behind it (discussion #133 by Schobiwan88).
+- **Sidelights of a front door:** a single sidelight can sit on the hinge side, and the widths are adjustable, left and right separately with two (discussion #135 by Schobiwan88).
+- **Mirror furniture:** a switch in the furniture form, in the right-click menu of the plan and in the furnish bar of the 3D view turns an item left-right – the L-sofa the other way round, a cabinet with its door on the other side, pack items too (#107 by N4IR0, discussion #121 by Thundras).
+- **Floor and room bar:** a ≡ button at its right end wraps it onto several lines (remembered per device); in one line it scrolls with the mouse wheel and shows a thin scrollbar under the pointer; in the house view each floor's rooms follow a small floor label (#129 by denisb88).
+- **LED strips tilt and stand upright:** a tilt about the strip's length lays it against a roof slope or turns it sideways; "Upright" stands it on end from its mount height – along a door frame, as a light column (#123 by RobertSorgenfrei, discussion #122 by idaho).
+
+## 1.10.2
+
+### New
+
+- **Energy Pro: every plant keeps its card** – the plant whose field carries the main hologram no longer loses its own card; the main card steps aside next to the field unless it was moved by hand (#128 by denisb88).
+- **Energy Pro: the main hologram can hang free** at a point in the plan (handle ◈ in the energy tool, height above the ground) instead of only on a solar field (#128).
+- **Energy Pro: a switch per inverter** hides that plant's card (#128).
+
+### Fixed
+
+- **Camera wall** shares the sheet between the cameras: one camera fills it, two sit side by side, up to four in a 2×2 grid, more in three or four columns. Tapping a tile shows that camera big as a live stream through Home Assistant’s own player (the tiles stay stills, and a small note in the wall header and in the look-through bar says so); from there "Look through the camera" goes into the 3D view, and "Back to the view" brings the wall back.
+- **Door form:** the switch "Show closed without a sensor" was missing – it sat in the window-only sensor block; the drive's position sensor and confirm switch show only once a drive is set or found; the drive field is called "Drive" for doors and gates.
+- **Wall heights:** the rows in the room form lay out cleanly again (name and height, the buttons below, a split point in its own line) instead of the cut button slipping out of line.
+- **Canopies stay on their posts** when the floors are pulled apart; before, a terrace roof or carport lifted off with the house roof (discussion #137 by RobertSorgenfrei).
+- A device marker set to **"always"** shows its value (temperature, humidity …) on the floor as well, not only inside its room (discussion #130 by Chipsy79).
+- **Cut view:** a tap on the cut-away upper part of a window no longer switches its blind or curtain by mistake; it goes through to what lies behind (discussion #127 by creativeibiza).
+
+## 1.10.1
+
+### New
+
+- **Own name for a placed device** in the plan, without renaming the entity in Home Assistant (#125 by RobertSorgenfrei).
+- **Turn a floor by 90°** in the floor form, for a floor drawn the wrong way round (discussion #120 by MStengel69).
+- **Card:** `room:` starts the card in one room, e.g. a display for the kids' room (discussion #119 by HeroHoshy).
+- A roof slope that reaches down into the floor below the attic cuts that floor's walls as well (discussion #75, idaho).
+- **Camera cockpit 2** (a free update of the Pro add-on): **detection pins** – what a camera's sensors see right now (person, vehicle, animal, motion – Frigate, UniFi Protect, Reolink …) stands in front of it as a pin with the time; the **camera wall** – every placed camera's live picture at once ("Cameras" switch, card option `camera_wall`), motion framed red, recording marked; a tap looks through the camera.
+
+### Fixed
+
+- A camera mounted just inside an outer wall and looking out had its wedge cut by that wall (20 cm long); the wall the camera hangs on no longer counts (reported by the maintainer's own driveway camera).
+- The version notice now tells which side is behind: an old bundle in the browser or the companion app gets "reload the page" with a Reload button (and the cache hint for the companion app) instead of "restart Home Assistant"; both versions are shown. A pack with a Pro feature this frontend does not know yet says so instead of looking like a furniture pack (support case of a French customer).
+
+## 1.10.0
+
+### New
+
+- **Roof slopes with knee walls:** when a roof section's top of walls lies below the ceiling of the floor underneath, that floor's walls end under the roof – knee walls at the eaves, gables up to the ridge, inner walls cut by the slope; windows stay below it. Dashed headroom lines (1.5 m, 2 m) in the plan editor (mindmonk's description in [PR #66](https://github.com/Mastershort/neonplan3d/pull/66), discussions #64, #75).
+- **Roof stays:** a switch in the view bar (and the card option `roof_fade: false`) keeps the roof on the house while zooming in; in the editor's roof and energy tools it always stays.
+- **Roof windows:** a window motor (Velux, Roto, Fakro as a cover) opens the sash as far as it stands, a name, a warm glow while open or tilted, and a hole in the slope of a roof section so the attic looks out (discussion #47, PR #66 by mindmonk).
+- **Dormers and cross gables:** "+ Dormer" in a section's form puts a dormer on a slope (gable or pent); its depth ends where its ridge meets the slope, the slope opens only where the dormer's roof lies above it (valleys), the cheeks close it, the attic wall rises up to it for the dormer window. A wide dormer with its eaves on the top of walls is a cross gable (a three-gable house). Where sections overlap, the higher roof is the ceiling (discussion #75, PR #66 by mindmonk).
+- **Roof shapes:** half-hip, pyramid, mansard and flat with parapet join gable, hip, pent and flat; attic walls end under hipped ends and broken slopes as well (discussions #90, #74, #47).
+- **Flat roof as a free shape:** "Take the floor's outline" gives a flat section the outline of the floor's rooms (L, Z, U …) as one surface; its corners can be dragged (#108 by rolandarends).
+- **Roller shutters on doors:** a front door, French window or sliding door takes a cover too; the blind comes down over it and can be moved like a window's (#114 by denisb88).
+- **Shift a floor:** "Shift the floor" in the floor form moves everything on the floor by X and Z (#25 by morbidos123).
+- **Split a wall:** ✂ in the wall heights box cuts a wall at a point of your own, so one wall in line can have two heights (2.5 m next to 1.7 m); the split point can be moved and removed (#109 by rolandarends).
+
+## 1.9.2
+
+### Fixed
+
+- Pack furniture that lights but is not "electric" (mirror with light, bedside lamp, aquarium, fire bowl, star ceiling, LED niche, light cove, workshop light, night light) had no light field in the editor and a tap sent an invalid entity id to Home Assistant (#46 by StevenKRT and N4IR0, #88 by wh1tetiger).
+- The lit wall face left a misaligned dark rectangle over windows on low floors: the light cells now break at every sill, top and side of an opening (#87 by newbeehome).
+- The plan editor stayed in English for French, Spanish, Dutch, Italian (and Hungarian): its bundle never fetched the language file (#96 by denisb88).
+- A TV that only reports "on" (Samsung, LG) glows now; before, only "playing" lit the screen (#98 by newbeehome).
+- Dimmed lights looked switched off: the glow follows a perceptual curve now, a lamp at 10 % still reads as on (#103 by newbeehome).
+- Free-standing walls (a garden wall) take wall-mounted solar fields, on both sides (#105 by rolandarends).
+- An LED strip outside the house sits on the ground again (lawn, terrace) instead of a slab's thickness above it (#70 by domodial).
+
+### New
+
+- **Doors without a sensor** can be drawn closed ("Show closed without a sensor" in the door form) instead of half open (discussion #86 by robertkrizovnik).
+- **Card:** `start_view` gives a card a start view of its own, e.g. for a small overview on another dashboard; the editor's start view section shows the line to copy (discussion #89 by karli4711).
+- French, Spanish, Dutch and Italian: the 43 texts added since 1.9.0 (energy setup, tilt angle, icons, help) are translated now; they showed in English.
+- **Hungarian** as the fifth extra language (proofread by kopaszsop, [#51](https://github.com/Mastershort/neonplan3d/issues/51)).
+- **Module power (Wp)** per solar field instead of the fixed 400 W, for the kWp of fields and strings and the living modules (#99 by denisb88).
+- **Floors apart** lifts the roof off the top floor as well (#101 by rolandarends).
+- **Energy Pro – device holograms:** every device with a power sensor can carry a small glass card (power now, today's kWh, day curve), in the house view and on its floor; "Hologram over the device" in the furniture form; a **Holograms** button in the energy bar hides all cards (card option `holograms`). The first free update of the pack.
+
+## 1.9.1
+
+### New
+
+- **Own marker symbols:** any Material Design icon (`mdi:…`) for a device or an electric furniture item ([#62](https://github.com/Mastershort/neonplan3d/issues/62)).
+- **Tilt angle sensor** on windows: the sash tilts as far as the sensor reports, with maximum angle, offset and sign ([#15](https://github.com/Mastershort/neonplan3d/issues/15)).
+- **Camera wedge:** can be switched off per camera, and in 3D it ends at the first wall ([discussions #49, #50](https://github.com/Mastershort/neonplan3d/discussions/49)).
+- **Dashboard button** on the card: `dashboard` and `dashboard_label` open another dashboard or view ([discussion #48](https://github.com/Mastershort/neonplan3d/discussions/48)).
+- **Wall heights per part** of a wall that a neighbouring room splits ([#77](https://github.com/Mastershort/neonplan3d/issues/77)).
+- **Light through open walls:** with "No wall" a lamp lights the neighbouring room as if it were one room (idea and fork by Thundras, [discussion #68](https://github.com/Mastershort/neonplan3d/discussions/68)).
+- **Energy tool, easier to set up:** a setup checklist at the top that jumps to what is missing; "Take over from the energy dashboard" now fills the devices (and creates missing ones); a hint with a one-tap fix when a grid or battery sensor counts the other way round; the hologram also without a solar field (beside the house); the energy bar steps back while the hologram shows; a plain hologram on the tablet level.
+- **Help and feedback:** buttons for a GitHub issue (problem) and a discussion (idea) in the editor's settings and on the Extensions page; manual chapter 6.4 describes Energy Pro.
+- **Shop connection:** activations failed with HTTP 429 for everyone – the shop's web host turns away Home Assistant's default user agent. NeonPlan now sends its own, retries a throttled request twice with a pause (Retry-After respected), spaces out pack downloads, and explains a 429 in plain words.
+- **Energy Pro:** one hologram per plant (a balcony plant with its own inverter gets its own card over its field); home batteries with separate charging and discharging sensors (e.g. Anker Solix) through the new "Charging power" field; meters with separate import and export sensors through "Export power"; the power pickers list every sensor in W or kW, even without a device class.
+
+### Fixed
+
+- The start view also holds when a floor is opened: the house no longer turns round ([discussion #67](https://github.com/Mastershort/neonplan3d/discussions/67)).
+- Two windows one above the other both cut their hole into the wall (reported by Thundras).
+- iPad: the "Add floor" menu stays inside the sidebar ([#85](https://github.com/Mastershort/neonplan3d/issues/85)).
+
+## 1.9.0
+
+### New
+
+- **Four more languages:** French, Spanish, Dutch and Italian, following the Home Assistant user's language. They come as separate language files fetched only when needed, so the bundles stay small for wall tablets. French was asked for in [#51](https://github.com/Mastershort/neonplan3d/issues/51) (thanks, denisb88).
+- **No wall:** every wall of a room can be left out (button "No wall" in the wall heights), for open floor plans whose rooms are one space but separate areas in Home Assistant ([discussion #68](https://github.com/Mastershort/neonplan3d/discussions/68)).
+- **Start view:** remember the current 3D view in the editor; the 3D view, the card and the kiosk then open the house that way, e.g. from the garden side ([discussion #67](https://github.com/Mastershort/neonplan3d/discussions/67)).
+- **Energy tool:** the **electricity meter** (grid sensor, shows import/export) and the **grid connection** (where the cable to the utility leaves the plot) as energy devices; an **Energy balance** section with the sensors of the house, taken from the devices in the plan or from Home Assistant's energy dashboard; several inverters and batteries with their own sensors; **models** for inverters (wall, slim, hybrid) and batteries (tower, wall, compact). The hidden energy settings and the meter tool are gone in favour of this.
+- **Names:** every piece of furniture and every energy device can carry its own name, shown in lists, forms and on its pin in 3D.
+- Groundwork for the coming Pro add-on **Energy Pro** (power-flow cables, living solar modules, glass hologram): built in and locked until the add-on is released.
+
+## 1.8.1
+
+### Fixed
+
+- Entities without a registry entry (set up in YAML without a unique ID, e.g. USB cameras) can be placed: they show up under "without area" ([#56](https://github.com/Mastershort/neonplan3d/issues/56)).
+
+## 1.8.0
+
+### New
+
+- **Energy tool with solar fields** on the roof, free-standing on frames (garden, garage roof, with height and rotation, turn handle) and on house walls (upright or tilted away, up to a canopy); dragged in the plan and in the 3D view: modules in rows and columns on any roof face, lying in its slope, on flat roofs on tilted frames; placed on the sunniest face, dragged in the plan (also onto another face), with the field's kWp. Rows of their own length ("4, 4, 3"), single modules on/off, full black or blue look, module size, a name and a PV sensor per field, and strings that join fields across roofs (name, PV sensor, inverter). Solar fields are not held by the plan lock. On roof sections the faces include the overhang, so modules reach down to the eave.
+- **Energy devices:** solar inverter, home battery and wallbox, added and moved in the Energy tool; placed in the garage or a utility room against a wall, and the plan moves to them.
+- Home battery shows its charge and charging direction, the wallbox its status (charging, plugged in).
+- Solar fields and roof windows can be fixed. New furniture brings the plan to where it was put.
+- **Roof windows** in the roof faces, with blind, contact and tilt contact (the sash swings out, the blind comes down).
+
+## 1.7.0
+
+### New
+
+- **Ask before switching for blinds and garage doors:** open, close and positions ask first in the quick menu and the room panel; a swipe on the marker no longer moves them ([discussion #36](https://github.com/Mastershort/neonplan3d/discussions/36)). Devices that ask first no longer react to a swipe either.
+- **Status sensors on furniture:** a 3D printer's print status (or any enum status sensor) can be linked; the item counts as active while it prints or runs ([#41](https://github.com/Mastershort/neonplan3d/issues/41)).
+- **Worktop:** a free top without a base, its height is the top edge ([discussion #37](https://github.com/Mastershort/neonplan3d/discussions/37)).
+
+## 1.6.2
+
+### Fixed
+
+- The 3D view did not load on older iPads (iOS 15 and 16) with "SyntaxError: Unexpected token '{'"; the bundles are now built for Safari 15 and newer ([#42](https://github.com/Mastershort/neonplan3d/issues/42)).
+
+## 1.6.1
+
+### Fixed
+
+- A table lamp, floor lamp or uplight with a height above the floor set by hand now moves the lamp itself, not only its selection box ([#20](https://github.com/Mastershort/neonplan3d/issues/20)).
+- Heatmap and room panel with °F: sensors in °F are converted, the legend and values show Home Assistant's unit.
+- Overlapping floor openings are cut as one outline (an L-shaped opening) instead of breaking the floor.
+- A floor opening snapped to the room's edge is cut instead of being reported as outside the room.
+- The rain warning uses the weather entity chosen in the plan settings.
+
+### New
+
+- The warning for a window open in the rain can be switched off on its own (plan settings, weather).
+- Robot vacuums clean the room they report: a "current room" sensor (Roborock, Dreame …) is found on the robot's device and matched by room or area name.
+- Robot vacuums drive around cabinets, sofas, beds and appliances, but under tables, desks and chairs.
+
+## 1.6.0
+
+### New
+
+- **New in the shop** on the Extensions page (with a shop key) and a dot on the tab.
+- **Loyalty discount** code for further purchases, shown in NeonPlan 3D.
+- The Extensions page shows once what a pack update brought.
+- Screens and status lights of pack furniture can link a light (glow in its colour) or a switch.
+
+## 1.5.0
+
+### New
+
+- **Roof sections:** roofs made of several parts (L/T houses, barns, extensions), each with shape (gable, hip, pent, flat), ridge direction, eave and pitch per side; proposed from the rooms; new Roof tool in the editor.
+- **Canopies** (terrace roof, carport): posts and beams, see-through roof.
+- **Outdoor areas** are resized at their corners.
+
+## 1.4.0
+
+### New
+
+- **Devices from other areas and without an area** in the room form (source switch, grouped by area).
+- **Place all** is a small link that asks first.
+- **Room climate per room:** chosen sensors for temperature, humidity and CO₂; automatic skips device temperatures (3D printer, heat pump flow).
+
+### Fixes
+
+- Built-in furniture follows its height above floor in 3D (a dryer on the washing machine, #13).
+- The height above floor counts from the floor: wall cabinets (1.45 m), wall TVs and radiators can be set lower too.
+
+## 1.3.0
+
+### New
+
+- **Locking the floor plan** (rooms, walls, doors, windows, outdoor areas) and **fixing furniture and devices** (lock in the form, key L, right-click menu with duplicate, turn and delete).
+- **More sensors:** gas and water meters, energy, illuminance, pressure and air quality can be placed; values use Home Assistant's decimals (#7).
+- **TV on a smart plug:** TVs and media walls may link a switch instead of a media player (#5).
+- **Marker in 3D per device:** automatic, always, without watts or hidden.
+- **Highlight when closed** for doors and windows (WC, child's room).
+
+### Fixes
+
+- Furniture and lamps with a linked entity can be dragged in 3D again (grabbing the item or its marker).
+
+## 1.2.0
+
+### New
+
+- **Wall height per wall:** parapets, counters and half-height dividers. Rooms get a *Wall heights* box with every wall, free walls a height field.
+- **Doors and windows in free walls:** the *Door & window* tool now also works on free-standing walls.
+- **Height above floor** for wall lights and LED strips; strips below 1 m shine upwards.
+- **Ridge direction** of gable roofs: along the long or the short side (terraced houses, #1).
+- **Arrow keys** nudge the selection in the plan editor: one grid step, Shift 10 cm, Alt 1 cm.
+
+### Fixes
+
+- Several lamps linked to the same light no longer stay green in 3D; all follow the light.
+
+### Community
+
+- Issue templates, this changelog and an Ideas section for feature requests with voting.
+
+## 1.1.1
+
+### New
+
+- **Door style "Opening (no door)":** a passage between two rooms, just a gap in the wall without frame or leaf.
+
+## 1.1.0
+
+### New
+
+- **Free-standing walls:** the *Wall* tool draws a partition through part of a room.
+
+## 1.0.2
+
+### Fixes
+
+- Floor openings show from above; their rim glows like the wall tops.
+- The editor warns when a floor opening reaches across a room boundary.
+
+## 1.0.1
+
+### New
+
+- Manual links in the app, in your Home Assistant language (German or English).
+
+## 1.0.0
+
+The first public release: plan editor in Home Assistant, live neon 3D view, 40 built-in furniture models,
+cameras, wall tablet features, dashboard card with three looks, optional furniture packs and Pro add-ons.

@@ -1,0 +1,44 @@
+name: Release
+
+# On a published GitHub release: check that the tag matches the manifest version, pack the integration
+# as neonplan3d.zip and attach it. HACS and the Marketplace install from this zip (hacs.json zip_release,
+# on again since 18.11.2026 – hacs/integration#5643 was fixed on 25.10.2026), and its downloads are the
+# number the Marketplace shows. The zip is best attached when the release is created (the same files, packed
+# the same way), so no update in the first minute finds a release without it; then this job leaves it alone.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag matches the manifest version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version=$(python3 -c "import json; print(json.load(open('custom_components/neonplan3d/manifest.json'))['version'])")
+          if [ "$tag" != "$version" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match manifest version $version" >&2
+            exit 1
+          fi
+      - name: Pack the integration
+        run: |
+          cd custom_components/neonplan3d
+          find . -name '__pycache__' -prune -o -type f -print | sed 's|^\./||' | sort > /tmp/files
+          zip -q -X ../../neonplan3d.zip -@ < /tmp/files
+          cd ../..
+          unzip -l neonplan3d.zip | tail -1
+      - name: Attach to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # already attached when the release was created: keep it (replacing it would reset its download count)
+          if gh release view "$GITHUB_REF_NAME" --json assets --jq '.assets[].name' | grep -qx neonplan3d.zip; then
+            echo "neonplan3d.zip already attached"
+          else
+            gh release upload "$GITHUB_REF_NAME" neonplan3d.zip
+          fi
