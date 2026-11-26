@@ -115,7 +115,8 @@ export function manualUrl(lang: string | undefined, topic?: Feature | "extension
 }
 
 export function unlockedFeatures(packs: readonly { features?: string[] }[] = getPacks()): Set<Feature> {
-  const out = new Set<Feature>();
+  // fork: the free fun packs are always on, no customer account needed
+  const out = new Set<Feature>(FUN);
   for (const p of packs) for (const f of p.features ?? []) if (knownFeature(f)) out.add(f as Feature);
   return out;
 }

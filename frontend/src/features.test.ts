@@ -3,9 +3,9 @@ import { test } from "node:test";
 import { hasFeature, manualUrl, shopUrl, unlockedFeatures } from "./features.ts";
 
 test("features come from installed packs that list them; unknown names are ignored", () => {
-  assert.deepEqual([...unlockedFeatures([])], []);
+  assert.deepEqual([...unlockedFeatures([])].sort(), ["fun_halloween", "fun_pets", "fun_winter"]);
   const packs = [{ features: ["weather", "teleport"] }, { features: undefined }, { features: ["camera_cockpit"] }];
-  assert.deepEqual([...unlockedFeatures(packs)].sort(), ["camera_cockpit", "weather"]);
+  assert.deepEqual([...unlockedFeatures(packs)].sort(), ["camera_cockpit", "fun_halloween", "fun_pets", "fun_winter", "weather"]);
   assert.equal(hasFeature("screens", [{ features: ["screens"] }]), true);
   assert.equal(hasFeature("screens", [{ features: ["screens"] }]), true);
   assert.equal(hasFeature("weather", [{ features: ["weather"] }]), true);
