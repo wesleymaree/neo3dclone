@@ -1,20 +1,20 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { hasFeature, manualUrl, shopUrl, unlockedFeatures } from "./features.ts";
+import { FREE_IN_FORK, hasFeature, manualUrl, shopUrl, unlockedFeatures } from "./features.ts";
 
 test("features come from installed packs that list them; unknown names are ignored", () => {
-  assert.deepEqual([...unlockedFeatures([])].sort(), ["fun_halloween", "fun_pets", "fun_winter"]);
-  const packs = [{ features: ["weather", "teleport"] }, { features: undefined }, { features: ["camera_cockpit"] }];
-  assert.deepEqual([...unlockedFeatures(packs)].sort(), ["camera_cockpit", "fun_halloween", "fun_pets", "fun_winter", "weather"]);
-  assert.equal(hasFeature("screens", [{ features: ["screens"] }]), true);
-  assert.equal(hasFeature("screens", [{ features: ["screens"] }]), true);
-  assert.equal(hasFeature("weather", [{ features: ["weather"] }]), true);
-  assert.equal(hasFeature("camera_cockpit", [{ features: ["weather"] }]), false);
+  // fork: every add-on whose code ships here is on without a pack; pool (unreleased) and frames (a pack's module) are not
+  assert.deepEqual([...unlockedFeatures([])].sort(), [...FREE_IN_FORK].sort());
+  assert.ok(!FREE_IN_FORK.includes("pool") && !FREE_IN_FORK.includes("frames"));
+  assert.ok(["energy_pro", "auto_pro", "household", "time_travel", "fun_winter"].every((f) => FREE_IN_FORK.includes(f as never)));
+  const packs = [{ features: ["frames", "teleport"] }, { features: undefined }];
+  assert.ok(unlockedFeatures(packs).has("frames") && !unlockedFeatures(packs).has("teleport" as never));
+  assert.equal(hasFeature("pool", [{ features: ["pool"] }]), true);
+  assert.equal(hasFeature("pool", [{ features: ["weather"] }]), false);
 });
 
 test("time travel is a Pro add-on of its own with its section in the manual", () => {
-  assert.equal(hasFeature("time_travel", [{ features: ["time_travel"] }]), true);
-  assert.equal(hasFeature("time_travel", [{ features: ["energy_pro"] }]), false);
+  assert.equal(hasFeature("time_travel", []), true);
   assert.equal(manualUrl("de", "time_travel"), "https://mastershort.de/neonplan3d/anleitung/pro-erweiterungen/?lang=de#67-zeitreise");
   assert.equal(manualUrl("en", "time_travel"), "https://mastershort.de/en/neonplan3d/manual/pro-add-ons/?lang=en#67-time-travel");
 });

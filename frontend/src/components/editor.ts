@@ -181,6 +181,8 @@ import { furnitureSize, isElectric, isPackHeater, isPackSensor, isPackType, isRo
 /** Items that can be fixed against moving. */
 type FixKind = "room" | "opening" | "furniture" | "device" | "wall" | "outdoor";
 
+/** Fork: the shop is gone (no locked shop furniture, offers or sign-up hints). */
+const FORK_NO_SHOP = true;
 /** Highest mount height the backend accepts (schema: 0–10 m); "40" meant as centimetres would refuse every save. */
 const MAX_MOUNT_Y = 10;
 /** How far below the floor a piece outside the rooms may stand: steps down to a sunken terrace (#897). */
@@ -6392,7 +6394,7 @@ export class Fp3dEditor extends LitElement {
     };
     return html`<div class="fp3d-diag-invite" role="note">
       <span><b>🗺 ${this.t("map_start_title")}</b> ${this.t(ready ? "map_start_ready" : "map_start_text")}
-        ${account ? nothing : html`<br />🎁 ${fitText(this.hass?.language, "start_gift")}`}</span>
+        ${account || FORK_NO_SHOP ? nothing : html`<br />🎁 ${fitText(this.hass?.language, "start_gift")}`}</span>
       <span class="fp3d-diag-invite-buttons">
         ${ready ? nothing : html`<button class="fp3d-btn primary" @click=${() => (this._settingsDialog = "surroundings")}>${this.t("map_start_load")}</button>`}
         ${account ? nothing : html`<a class="fp3d-btn" style="text-decoration:none" href=${registerUrl(this.hass?.language)} target="_blank" rel="noopener">${fitText(this.hass?.language, "account_button")}</a>`}
@@ -13598,6 +13600,8 @@ export class Fp3dEditor extends LitElement {
   private libPreviewsAsked = false;
 
   private askPreviews(): void {
+    // fork: no shop, so no locked shop items in the library
+    if (FORK_NO_SHOP) return;
     if (this.libPreviewsAsked || !this.hass || !this.isAdmin) return;
     this.libPreviewsAsked = true;
     getPreviews(this.hass)

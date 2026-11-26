@@ -158,7 +158,8 @@ def test_a_car_tracker_says_home_or_away_only() -> None:
 
 def test_the_pack_feature_unlocks_time_travel() -> None:
     assert has_time_travel([{"features": ["energy_pro"]}, {"features": ["time_travel"]}])
-    assert not has_time_travel([{"features": ["energy_pro"]}, {"features": None}, {}])
+    # fork: time travel is on without a pack
+    assert has_time_travel([{"features": ["energy_pro"]}, {"features": None}, {}])
     assert "time_travel" in packs.KNOWN_FEATURES
 
 
@@ -194,7 +195,9 @@ def test_car_trackers_come_from_the_parking_spots() -> None:
     assert seeds == {"binary_sensor.spot2", "sensor.ev_soc", "sensor.spot4"}
     assert car_refs({}) == (set(), set())
     assert has_feature([{"features": ["auto_pro"]}], "auto_pro")
-    assert not has_feature([{"features": ["time_travel"]}], "auto_pro")
+    # fork: Car Pro is on without a pack; others still need one
+    assert has_feature([], "auto_pro")
+    assert not has_feature([{"features": ["time_travel"]}], "pool")
 
 
 async def _setup(hass: HomeAssistant) -> None:

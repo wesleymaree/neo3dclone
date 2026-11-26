@@ -29,6 +29,9 @@ import { packName, type FurniturePack } from "../packs.ts";
 import { moduleWaits } from "../modules.ts";
 import { boughtAnything, fitHints, fitText, offerFor } from "../fit-hints.ts";
 import { controls, tokens } from "../styles.ts";
+
+/** Fork: the shop is gone (account, offers, newsletter and the shop connection are not shown). */
+const FORK_NO_SHOP = true;
 import type { HomeAssistant } from "../types.ts";
 
 export class Extensions extends LitElement {
@@ -179,14 +182,10 @@ export class Extensions extends LitElement {
         <h2>${this.t("ext_title")}</h2>
         <p class="fp3d-sub">${this.t("ext_intro")}</p>
         <div class="fp3d-ext-actions">
-          <a class="fp3d-btn fp3d-primary" href=${shopUrl(this.hass?.language)} target="_blank" rel="noopener">${this.t("ext_shop")}</a>
-          <a class="fp3d-btn" href="https://github.com/Mastershort/neonplan3d/issues/new/choose" target="_blank" rel="noopener">🐞 ${this.t("help_issue")}</a>
-          <a class="fp3d-btn" href="https://github.com/Mastershort/neonplan3d/discussions/categories/ideas" target="_blank" rel="noopener">💡 ${this.t("help_idea")}</a>
-          <a class="fp3d-btn" href="https://discord.gg/SSdVVFsev7" target="_blank" rel="noopener">💬 ${this.t("help_discord")}</a>
+          <a class="fp3d-btn" href="https://github.com/wesleymaree/neo3dclone/issues" target="_blank" rel="noopener">🐞 ${this.t("help_issue")}</a>
           <a class="fp3d-btn" href=${manualUrl(this.hass?.language, "extensions")} target="_blank" rel="noopener">📖 ${this.t("manual")}</a>
         </div>
       </header>
-      ${this.renderUpdates()} ${this.renderAccount()} ${this.renderSupporter()} ${this.renderNewsletter()} ${this.renderOffers()} ${this.renderShop()}
       <section class="fp3d-ext-card">
         <h3>${this.t("ext_pro")}</h3>
         <div class="fp3d-ext-pro">
@@ -210,6 +209,7 @@ export class Extensions extends LitElement {
           )}
         </div>
       </section>
+      ${FORK_NO_SHOP ? nothing : html`${this.renderUpdates()} ${this.renderAccount()} ${this.renderSupporter()} ${this.renderNewsletter()} ${this.renderOffers()} ${this.renderShop()}`}
       ${this.renderFun(unlocked)} ${this.renderPacks()} ${this.renderModules()}
     </div>`;
   }

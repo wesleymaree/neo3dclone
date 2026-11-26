@@ -114,9 +114,12 @@ export function manualUrl(lang: string | undefined, topic?: Feature | "extension
   return `${base}${page}?lang=${de ? "de" : "en"}${anchor ? `#${anchor}` : ""}`;
 }
 
+/** Fork: the add-ons unlocked without a pack. */
+export const FREE_IN_FORK: readonly Feature[] = [...FEATURES.filter((f) => f !== "pool" && !MODULE_FEATURES.includes(f)), "fridge_smart", ...FUN];
+
 export function unlockedFeatures(packs: readonly { features?: string[] }[] = getPacks()): Set<Feature> {
-  // fork: the free fun packs are always on, no customer account needed
-  const out = new Set<Feature>(FUN);
+  // fork: every add-on whose code ships here is always on, no shop needed (pool is unreleased, frames lives in a pack's module)
+  const out = new Set<Feature>(FREE_IN_FORK);
   for (const p of packs) for (const f of p.features ?? []) if (knownFeature(f)) out.add(f as Feature);
   return out;
 }

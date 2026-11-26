@@ -16,6 +16,8 @@ MAX_SPAN = 26 * 3600
 # Rows kept per entity and day: every change of the state stays, attribute-only rows are thinned out.
 MAX_ROWS = 1500
 STAT_STEP = 300
+# fork: Pro features whose code ships with the integration are on without a pack
+FREE_IN_FORK = frozenset({"auto_pro", "time_travel"})
 
 # Domains whose attributes matter for the 3D view, with the attributes that are kept (everything else
 # - pictures, positions of media, forecasts - stays out of the answer).
@@ -238,7 +240,9 @@ def car_state(state: str) -> str:
 
 
 def has_feature(packs: Iterable[Mapping[str, Any]], feature: str) -> bool:
-    """Whether an installed pack unlocks a Pro feature."""
+    """Whether a Pro feature is on: in this fork the shipped ones always are, others need an installed pack."""
+    if feature in FREE_IN_FORK:
+        return True
     return any(feature in (pack.get("features") or []) for pack in packs)
 
 
