@@ -1,6 +1,6 @@
 <div align="center">
 
-# NeonPlan 3D – wesleymaree fork
+# NeonPlan 3D – fork
 
 **A 3D floor plan for Home Assistant: draw your home right inside Home Assistant and live in it as a glowing neon house, or in any style you like.**<br>
 Lights glow in their colours, blinds move, doors open, cameras watch and energy flows through the walls.
@@ -50,7 +50,7 @@ Requires Home Assistant 2025.1 or newer.
 ### HACS (older Home Assistant)
 
 1. **HACS → ⋮ → Custom repositories**: add `https://github.com/wesleymaree/neo3dclone` with the type **Integration**.
-2. Search for **NeonPlan 3D (wesleymaree fork)**, download it and restart Home Assistant.
+2. Search for **NeonPlan 3D (fork)**, download it and restart Home Assistant.
 
 ### Manual
 
