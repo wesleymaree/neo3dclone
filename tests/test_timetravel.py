@@ -219,13 +219,14 @@ def _msg(**over: Any) -> dict[str, Any]:
     }
 
 
-async def test_history_needs_the_pro_add_on(hass: HomeAssistant, hass_ws_client) -> None:
+async def test_history_needs_no_pack_in_the_fork(hass: HomeAssistant, hass_ws_client) -> None:
+    """Fork: time travel is on without a pack, so the next check (the recorder) answers."""
     await _setup(hass)
     client = await hass_ws_client(hass)
     await client.send_json_auto_id(_msg())
     result = await client.receive_json()
     assert not result["success"]
-    assert result["error"]["code"] == "not_unlocked"
+    assert result["error"]["code"] == "no_recorder"
 
 
 async def test_history_checks_the_window_and_the_recorder(hass: HomeAssistant, hass_ws_client) -> None:
@@ -345,8 +346,8 @@ class _Instance:
         return func(*args)
 
 
-async def test_history_without_auto_pro_has_no_cars(hass: HomeAssistant, hass_ws_client) -> None:
-    """Without Auto Pro no tracker is answered, even one on a parking spot."""
+async def test_history_has_cars_without_an_auto_pro_pack(hass: HomeAssistant, hass_ws_client) -> None:
+    """Fork: Auto Pro is on without a pack, so a tracker on a parking spot is answered."""
     await _setup(hass)
     data = hass.data[DOMAIN]
     data.packs = [{"id": "test.pro", "features": ["time_travel"], "items": []}]
@@ -368,7 +369,7 @@ async def test_history_without_auto_pro_has_no_cars(hass: HomeAssistant, hass_ws
         )
         result = await client.receive_json()
     assert result["success"], result
-    assert "device_tracker.car" not in str(asked)
+    assert "device_tracker.car" in str(asked)
 
 
 async def test_history_leaves_places_and_carried_devices_out(hass: HomeAssistant, hass_ws_client) -> None:
