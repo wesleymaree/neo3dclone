@@ -13749,7 +13749,7 @@ export class Fp3dEditor extends LitElement {
           </div>`
         : html`<label class="fp3d-btn fp3d-primary"
             >${draft?.busy ? this.t("model_reading") : this.t("model_import")}
-            <input type="file" accept=".obj,.mtl,.step,.stp,.iges,.igs" multiple hidden ?disabled=${!!draft?.busy} @change=${(e: Event) => void this.readModelFiles(e)}
+            <input type="file" accept=".obj,.mtl,.glb,.gltf,.bin,.png,.jpg,.jpeg,.step,.stp,.iges,.igs" multiple hidden ?disabled=${!!draft?.busy} @change=${(e: Event) => void this.readModelFiles(e)}
           /></label>`}
       ${draft?.error ? html`<span class="fp3d-sub fp3d-pack-error">${draft.error}</span>` : nothing}
       ${own.map(
@@ -13781,7 +13781,7 @@ export class Fp3dEditor extends LitElement {
       this.updateModelDraft({});
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
-      const key = msg === "unsupported" ? "model_error_type" : msg === "too detailed" ? "model_error_detail" : "model_error_read";
+      const key = msg === "unsupported" ? "model_error_type" : msg === "too detailed" ? "model_error_detail" : msg === "compressed" ? "model_error_compressed" : msg === "missing_bin" ? "model_error_bin" : "model_error_read";
       this._modelImport = { ...empty, busy: false, error: this.t(key) };
     }
   }

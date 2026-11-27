@@ -23,7 +23,7 @@ This is a fork of [NeonPlan 3D by Mastershort](https://github.com/Mastershort/ne
 
 - **No account needed for the fun packs.** *Winter & Christmas* (fairy lights, snow, Christmas tree, Advent wreath, New Year's Eve firework), *Pets* (cats, dogs and rabbits walking through your house) and *Halloween* are always on. The "🎁 Free: winter and pets" sign-up popup no longer appears.
   Furniture that only comes from the shop's packs (such as a cat bed) is not included.
-- **Your own 3D models as furniture.** Import an `.obj` file (with its `.mtl` for colours) or a `.step`/`.stp`/`.iges` CAD file. It appears in the furniture library and can be placed, moved, turned and resized like any other piece. [How to use it](#-your-own-3d-models)
+- **Your own 3D models as furniture.** Import a `.glb`/`.gltf` file, an `.obj` file (with its `.mtl` for colours) or a `.step`/`.stp`/`.iges` CAD file. It appears in the furniture library and can be placed, moved, turned and resized like any other piece. [How to use it](#-your-own-3d-models)
 - **Installs from this repository.** Updates come from the releases here, not from the original project.
 - Paid Pro add-ons and shop furniture packs are not part of this repository, just as in the original.
 
@@ -70,6 +70,8 @@ Copy `custom_components/neonplan3d` into `/config/custom_components/` on your Ho
 
 1. Open **Editor → Furniture**. At the bottom of the library, under **Your own 3D models**, click **Import 3D model**.
 2. Choose the file:
+   - **GLB:** one file with everything in it. Colours come from its materials, vertex colours and textures. Compressed files (Draco, meshopt) are not supported: export without compression.
+   - **glTF:** select the `.gltf` together with its `.bin` and texture pictures.
    - **OBJ:** select the `.obj` and its `.mtl` together to keep the colours. Without the `.mtl` the model takes the furniture colour of the current look.
    - **STEP / STP / IGES:** CAD files are converted in the browser with [OpenCascade](https://dev.opencascade.org/) (about 8 MB, loaded only while you import).
 3. Pick **What is it?** This decides what a linked entity does with the model:

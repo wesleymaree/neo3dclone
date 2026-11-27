@@ -1,6 +1,7 @@
 // Fork: the models bundle – reads .obj (with an optional .mtl) and .step/.iges files into furniture. Loaded only when
 // an admin imports a model; STEP goes through OpenCascade (occt-import-js, LGPL-2.1), fetched from occt/ next to it.
 
+import { readGltf, splitGlb, type Picture } from "./gltf.ts";
 import { guessUnit, parseMtl, parseObj, prepare, UNITS, type Prepared, type RawMesh, type Unit } from "./mesh.ts";
 
 export { prepare, UNITS, type Prepared, type RawMesh, type Unit };
@@ -83,11 +84,61 @@ export function fromOcct(meshes: OcctMesh[]): RawMesh {
 
 const stem = (name: string) => name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").trim().slice(0, 80) || "Model";
 
-/** Reads the chosen files: one model file (.obj, .step, .stp, .iges, .igs), for .obj optionally its .mtl. */
+/**
+ * Reads the chosen files: one model file (.obj, .glb, .gltf, .step, .stp, .iges, .igs); for .obj optionally its .mtl,
+ * for .gltf its .bin and pictures.
+ */
+/** A picture of a glTF, decoded in the browser (at most 1024 px a side – enough to colour the vertices). */
+async function decodePicture(bytes: Uint8Array, mime: string): Promise<Picture | null> {
+  if (typeof createImageBitmap !== "function") return null;
+  const bmp = await createImageBitmap(new Blob([bytes as BlobPart], { type: mime }));
+  const k = Math.min(1, 1024 / Math.max(bmp.width, bmp.height));
+  const w = Math.max(1, Math.round(bmp.width * k));
+  const h = Math.max(1, Math.round(bmp.height * k));
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  ctx.drawImage(bmp, 0, 0, w, h);
+  bmp.close();
+  return { width: w, height: h, data: ctx.getImageData(0, 0, w, h).data };
+}
+
+/** glTF is in metres – but many exports are not: a model larger than 10 m gets the unit that makes it furniture-sized. */
+function gltfUnit(raw: RawMesh): Unit {
+  let big = 0;
+  for (let a = 0; a < 3; a++) {
+    let lo = Infinity;
+    let hi = -Infinity;
+    for (let k = a; k < raw.pos.length; k += 3) {
+      lo = Math.min(lo, raw.pos[k]);
+      hi = Math.max(hi, raw.pos[k]);
+    }
+    big = Math.max(big, hi - lo);
+  }
+  return big > 10 ? guessUnit(raw) : "m";
+}
+
 export async function readModel(files: File[]): Promise<ReadModel> {
-  const model = files.find((f) => /\.(obj|step|stp|iges|igs)$/i.test(f.name));
+  const model = files.find((f) => /\.(obj|glb|gltf|step|stp|iges|igs)$/i.test(f.name));
   if (!model) throw new Error("unsupported");
   const name = stem(model.name);
+  // glTF: metres, y up
+  if (/\.glb$/i.test(model.name)) {
+    const { json, bin } = splitGlb(new Uint8Array(await model.arrayBuffer()));
+    const raw = await readGltf(json, { glbBin: bin, decode: decodePicture });
+    return { raw, unit: gltfUnit(raw), zUp: false, name };
+  }
+  if (/\.gltf$/i.test(model.name)) {
+    // its .bin and pictures are the files chosen with it, found by name
+    const file = async (wanted: string) => {
+      const f = files.find((x) => x.name.toLowerCase() === wanted.toLowerCase());
+      return f ? new Uint8Array(await f.arrayBuffer()) : null;
+    };
+    const raw = await readGltf(JSON.parse(await model.text()), { file, decode: decodePicture });
+    return { raw, unit: gltfUnit(raw), zUp: false, name };
+  }
   if (/\.obj$/i.test(model.name)) {
     const mtl = files.find((f) => /\.mtl$/i.test(f.name));
     const raw = parseObj(await model.text(), mtl ? parseMtl(await mtl.text()) : new Map());
