@@ -24,6 +24,7 @@ This is a fork of [NeonPlan 3D by Mastershort](https://github.com/Mastershort/ne
 - **No account needed for the fun packs.** *Winter & Christmas* (fairy lights, snow, Christmas tree, Advent wreath, New Year's Eve firework), *Pets* (cats, dogs and rabbits walking through your house) and *Halloween* are always on. The "🎁 Free: winter and pets" sign-up popup no longer appears.
   Furniture that only comes from the shop's packs (such as a cat bed) is not included.
 - **Your own 3D models as furniture.** Import a `.glb`/`.gltf` file, an `.obj` file (with its `.mtl` for colours) or a `.step`/`.stp`/`.iges` CAD file. It appears in the furniture library and can be placed, moved, turned and resized like any other piece. [How to use it](#-your-own-3d-models)
+- **Colours for door and window frames.** Select a door or window in the editor and open **🎨 Colours**: a frame colour (and for doors a door leaf colour) from white, cream, grey, anthracite, black, light oak, oak and walnut, or any colour you pick. **Use for all doors / windows** applies it everywhere at once. The colours show in the homely styles; the neon looks keep their own.
 - **Installs from this repository.** Updates come from the releases here, not from the original project.
 - Paid Pro add-ons and shop furniture packs are not part of this repository, just as in the original.
 

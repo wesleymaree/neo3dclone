@@ -111,6 +111,12 @@ export interface Opening {
   top_hung?: boolean;
   /** Look of the door or window (null = automatic: a front door in an exterior wall, else a room door). */
   style?: OpeningStyle | null;
+  /**
+   * Fork: own colours in the homely styles ("#rrggbb", null = the style's own): the frame (with a window's sashes)
+   * and a door's leaf. The neon looks keep their colours.
+   */
+  frame_color?: string | null;
+  leaf_color?: string | null;
   /** A garage door's kind: a sectional door (null) or an up-and-over door, one leaf that swings out and up. */
   garage_kind?: "sectional" | "tilt" | null;
   /** One sidelight: on the hinge side instead of opposite the hinge. */

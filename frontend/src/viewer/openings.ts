@@ -8,7 +8,8 @@ import { sidelightLayout, isFrontDoor, openingStyle } from "../model.ts";
 import type { OpeningInfo } from "./build.ts";
 import type { Opening } from "../model.ts";
 import { ALWAYS, GeoBuffer, shade } from "./geo.ts";
-import { palette } from "./palette.ts";
+import { finishSafe } from "./furniture.ts";
+import { hexColor, naturalPalette, palette } from "./palette.ts";
 
 /** Colours of the parts: neon, or natural materials while a homely style is on. */
 const OP = palette({ FRAME: 0x1f3052, FRAME_TOP: 0x2a4270, SASH: 0x22375f, SILL: 0x1c2a47, BLIND_BOX: 0x16223a, LEAF: 0x1c2c4d, LEAF_TOP: 0x27406b, LEAF_FRONT: 0x111a30, LEAF_FRONT_TOP: 0x1c2a47, HANDLE: 0x5b7cff, HANDLE_TOP: 0x8aa2ff, GLASS: shade(0x37e0ff, 0.08) }, { FRAME: 0xf3f3f1, FRAME_TOP: 0xfbfbfa, SASH: 0xeeeeec, SILL: 0xe3dfd7, BLIND_BOX: 0xdedbd5, LEAF: 0xf3f1ec, LEAF_TOP: 0xfbfaf7, LEAF_FRONT: 0x464b53, LEAF_FRONT_TOP: 0x585e67, HANDLE: 0x9da3ab, HANDLE_TOP: 0xbcc2c9, GLASS: new Color(0xb9d6e6) });
@@ -245,12 +246,18 @@ export function buildOpeningParts(infos: readonly OpeningInfo[], states: Readonl
   const frames = new GeoBuffer();
   const glass = new GeoBuffer();
   const blinds = new GeoBuffer(true);
-  const frameC = new Color(OP.FRAME);
-  const frameTop = new Color(OP.FRAME_TOP);
+  const frameBase = new Color(OP.FRAME);
+  const frameBaseTop = new Color(OP.FRAME_TOP);
   const frameTris: OpeningParts["frameTris"] = [];
   const glassTris: OpeningParts["glassTris"] = [];
   const blindTris: OpeningParts["blindTris"] = [];
   for (const info of infos) {
+    // fork: the opening's own frame and leaf colours, in the homely styles only (the neon looks keep theirs)
+    const ownFrame = naturalPalette() ? finishSafe(hexColor(info.opening.frame_color)) : null;
+    const ownLeaf = naturalPalette() ? finishSafe(hexColor(info.opening.leaf_color)) : null;
+    const frameC = ownFrame !== null ? new Color(ownFrame) : frameBase;
+    const frameTop = ownFrame !== null ? shade(ownFrame, 1.08) : frameBaseTop;
+    const sashBase = ownFrame !== null ? ownFrame : OP.SASH;
     const fStart = frames.count;
     const gStart = glass.count;
     const bStart = blinds.count;
@@ -269,11 +276,11 @@ export function buildOpeningParts(infos: readonly OpeningInfo[], states: Readonl
       const n0 = -info.faceOut - 0.012;
       const n1 = info.faceRoom + 0.012;
       const garageOpen = info.opening.type === "garage" && (markClosed ? !!st.sensed && (st.cover ?? 1) >= 0.95 : (st.cover ?? 1) < 0.95);
-      const frameC = garageOpen ? shade(OPEN_WARM, 0.8) : new Color(OP.FRAME);
-      const frameTop = garageOpen ? shade(OPEN_WARM, 1) : new Color(OP.FRAME_TOP);
-      splitBox(frames, tf, -0.045, 0.02, n0, n1, 0, T + 0.045, frameC, frameTop, cut, bucket);
-      splitBox(frames, tf, W - 0.02, W + 0.045, n0, n1, 0, T + 0.045, frameC, frameTop, cut, bucket);
-      splitBox(frames, tf, 0.02, W - 0.02, n0, n1, T - 0.02, T + 0.045, frameC, frameTop, cut, bucket);
+      const doorC = garageOpen ? shade(OPEN_WARM, 0.8) : frameC;
+      const doorTop = garageOpen ? shade(OPEN_WARM, 1) : frameTop;
+      splitBox(frames, tf, -0.045, 0.02, n0, n1, 0, T + 0.045, doorC, doorTop, cut, bucket);
+      splitBox(frames, tf, W - 0.02, W + 0.045, n0, n1, 0, T + 0.045, doorC, doorTop, cut, bucket);
+      splitBox(frames, tf, 0.02, W - 0.02, n0, n1, T - 0.02, T + 0.045, doorC, doorTop, cut, bucket);
     }
     if (info.opening.type === "door") {
       // leaves flush with the face they swing towards (the room, or the other side), turning around
@@ -332,8 +339,8 @@ export function buildOpeningParts(infos: readonly OpeningInfo[], states: Readonl
         // an open leaf leaves its wall: keep it visible when the wall folds away
         const leafBucket = open > 0.05 ? ALWAYS : bucket;
         const warm = markClosed ? !!st.sensed && open < 0.05 : open > 0.9;
-        const leafC = warm ? shade(OPEN_WARM, 0.7) : new Color(front ? OP.LEAF_FRONT : OP.LEAF);
-        const leafTop = warm ? shade(OPEN_WARM, 0.9) : new Color(front ? OP.LEAF_FRONT_TOP : OP.LEAF_TOP);
+        const leafC = warm ? shade(OPEN_WARM, 0.7) : ownLeaf !== null ? new Color(ownLeaf) : new Color(front ? OP.LEAF_FRONT : OP.LEAF);
+        const leafTop = warm ? shade(OPEN_WARM, 0.9) : ownLeaf !== null ? shade(ownLeaf, 1.08) : new Color(front ? OP.LEAF_FRONT_TOP : OP.LEAF_TOP);
         if (style === "glass") {
           // a glass door: slim stiles and rails around a pane
           splitBox(frames, leafTf, 0, 0.05, -thick, 0, 0.01, T - 0.01, leafC, leafTop, cut, leafBucket);
@@ -393,7 +400,7 @@ export function buildOpeningParts(infos: readonly OpeningInfo[], states: Readonl
       const halfW = (W - 2 * fw) / 2 + 0.03;
       const open = Math.min(1, Math.max(st.open, st.tilt * 0.12));
       const alert = markClosed ? !!st.sensed && open < 0.02 : open > 0.02;
-      const sashC = alert ? shade(OPEN_WARM, 0.75) : new Color(OP.SASH);
+      const sashC = alert ? shade(OPEN_WARM, 0.75) : new Color(sashBase);
       const sashTop = alert ? shade(OPEN_WARM, 0.95) : frameTop;
       const sw = 0.06;
       const pane = (x0: number, n0: number, shift: number, c: Color, top: Color, glassC: Color) => {
@@ -410,7 +417,7 @@ export function buildOpeningParts(infos: readonly OpeningInfo[], states: Readonl
       const movingAt = info.hingeAtStart ? W - fw - halfW : fw;
       const run = open * (halfW - 0.08) * (info.hingeAtStart ? -1 : 1);
       // the fixed pane on the outer track, the sliding one on the inner track (towards the room)
-      pane(fixedAt, mid - fd + 0.005, 0, new Color(OP.SASH), frameTop, OP.GLASS);
+      pane(fixedAt, mid - fd + 0.005, 0, new Color(sashBase), frameTop, OP.GLASS);
       pane(movingAt, mid + 0.005, run, sashC, sashTop, alert ? shade(OPEN_WARM, 0.16) : OP.GLASS);
       // a pull handle on the sliding pane's free edge
       const hx = info.hingeAtStart ? movingAt + 0.025 : movingAt + halfW - 0.035;
@@ -463,7 +470,7 @@ export function buildOpeningParts(infos: readonly OpeningInfo[], states: Readonl
       for (const sash of sashes) {
         const ajar = sash.open > 0.02 || sash.tilt > 0.02;
         const alert = markClosed ? !!st.sensed && !ajar : ajar;
-        const sashC = alert ? shade(OPEN_WARM, 0.75) : new Color(OP.SASH);
+        const sashC = alert ? shade(OPEN_WARM, 0.75) : new Color(sashBase);
         const sashTop = alert ? shade(OPEN_WARM, 0.95) : frameTop;
         const sx0 = sash.x0;
         const sx1 = sash.x1;

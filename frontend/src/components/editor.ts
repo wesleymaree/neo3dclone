@@ -184,6 +184,18 @@ import { furnitureSize, isElectric, isPackHeater, isPackSensor, isPackType, isRo
 /** Items that can be fixed against moving. */
 type FixKind = "room" | "opening" | "furniture" | "device" | "wall" | "outdoor";
 
+/** Fork: colours offered for door and window frames and door leaves (white to black, then woods). */
+const OPENING_SWATCHES = [
+  { id: "white", hex: "#f3f3f1" },
+  { id: "cream", hex: "#e9dfc8" },
+  { id: "grey", hex: "#9ea3a8" },
+  { id: "anthracite", hex: "#3d4148" },
+  { id: "black", hex: "#222326" },
+  { id: "oak_light", hex: "#c9a375" },
+  { id: "oak", hex: "#a67a52" },
+  { id: "walnut", hex: "#6b4a32" },
+] as const;
+
 /** Fork: the shop is gone (no locked shop furniture, offers or sign-up hints). */
 const FORK_NO_SHOP = true;
 
@@ -11709,6 +11721,44 @@ export class Fp3dEditor extends LitElement {
       : html`${width("sidelight_width", "sidelight_width_left")} ${width("sidelight_width2", "sidelight_width_right")}`;
   }
 
+  /**
+   * Fork: the frame's colour (with a window's sashes) and a door's leaf colour, shown in the homely styles. Swatches
+   * like the furniture finishes, a free colour, and "the same for all doors / windows".
+   */
+  private renderOpeningColors(o: Opening) {
+    const admin = this.isAdmin;
+    if (o.type === "door" && openingStyle(o, this.openingIsExterior(o)) === "passage") return nothing;
+    const door = o.type === "door";
+    const rows: { key: "frame_color" | "leaf_color"; label: I18nKey }[] = [{ key: "frame_color", label: "opening_frame_color" }];
+    if (door) rows.push({ key: "leaf_color", label: "opening_leaf_color" });
+    const same = this._doc.floors.reduce((n, fl) => n + fl.openings.filter((x) => x.type === o.type).length, 0);
+    const all = () =>
+      this.change((d) => {
+        for (const fl of d.floors)
+          for (const x of fl.openings)
+            if (x.type === o.type) {
+              x.frame_color = o.frame_color ?? null;
+              if (door) x.leaf_color = o.leaf_color ?? null;
+            }
+      });
+    return html`<details class="fp3d-finish fp3d-wide" ?open=${!!(o.frame_color || o.leaf_color)}>
+      <summary>🎨 ${this.t("opening_colors")}</summary>
+      <p class="fp3d-sub">${this.t("opening_colors_hint")}</p>
+      ${rows.map(({ key, label }) => {
+        const cur = o[key] ?? null;
+        return html`<div class="fp3d-finish-row">
+          <span class="fp3d-finish-label">${this.t(label)}</span>
+          <button class="fp3d-swatch fp3d-swatch-own ${cur ? "" : "on"}" title=${this.t("opening_color_auto")} aria-label=${this.t("opening_color_auto")} ?disabled=${!admin} @click=${() => this.updateOpening({ [key]: null })}></button>
+          ${OPENING_SWATCHES.map(
+            (sw) => html`<button class="fp3d-swatch ${cur?.toLowerCase() === sw.hex ? "on" : ""}" style="background:${sw.hex}" title=${this.t(`opening_color_${sw.id}` as I18nKey)} aria-label=${this.t(`opening_color_${sw.id}` as I18nKey)} ?disabled=${!admin} @click=${() => this.updateOpening({ [key]: sw.hex })}></button>`,
+          )}
+          <input class="fp3d-swatch-pick" type="color" .value=${cur ?? OPENING_SWATCHES[0].hex} ?disabled=${!admin} title="#" @change=${(e: Event) => this.updateOpening({ [key]: (e.target as HTMLInputElement).value })} />
+        </div>`;
+      })}
+      ${same > 1 && admin ? html`<button class="fp3d-btn" @click=${all}>${this.t(door ? "opening_colors_all_doors" : o.type === "garage" ? "opening_colors_all_garages" : "opening_colors_all_windows", { n: same })}</button>` : nothing}
+    </details>`;
+  }
+
   private renderStyleSelect(o: Opening) {
     const styles: readonly OpeningStyle[] = o.type === "door" ? DOOR_STYLES : WINDOW_STYLES;
     const auto = openingStyle({ type: o.type, style: null }, this.openingIsExterior(o));
@@ -11853,6 +11903,7 @@ export class Fp3dEditor extends LitElement {
               </select></label
             >`
           : this.renderStyleSelect(o)}
+        ${this.renderOpeningColors(o)}
         ${window
           ? html`<label class="fp3d-field fp3d-wide" title=${this.t("sill_board_hint")}
               >${this.t("sill_board")}

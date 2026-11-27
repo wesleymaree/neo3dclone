@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { Opening } from "../model.ts";
 import type { OpeningInfo } from "./build.ts";
+import { Color } from "three";
 import { blindInside, buildOpeningParts, lightCover, sillBoards, stackedOnOpening, tiltLeaf } from "./openings.ts";
 
 /** A window (or door) on the wall along x from (sx, sz), as the floor builder describes it. */
@@ -186,4 +187,28 @@ test("a garage door is the door only: no roller shutter or shutter box in front 
   // a window with a cover still gets its shutter and box
   const w = info("w", 1, 1.2, 0.9, 2.2, { cover: "cover.w" });
   assert.ok(Math.max(...ys(buildOpeningParts([w], new Map([["w", { open: 0, tilt: 0, cover: 1 }]]), 99))) > 2.3);
+});
+
+test("a door's or window's own frame and leaf colours show in the homely styles only (fork)", async () => {
+  const { setNaturalPalette } = await import("./palette.ts");
+  const has = (w: OpeningInfo, hex: number) => {
+    const c = buildOpeningParts([w], new Map([[w.opening.id, { open: 0, tilt: 0, cover: null }]]), 99).frames.getAttribute("color").array as ArrayLike<number>;
+    // three.js keeps colours linear
+    const { r, g, b } = new Color(hex);
+    for (let i = 0; i < c.length; i += 3) if (Math.abs(c[i] - r) < 0.003 && Math.abs(c[i + 1] - g) < 0.003 && Math.abs(c[i + 2] - b) < 0.003) return true;
+    return false;
+  };
+  const win = info("w", 1, 1.2, 0.9, 2.2, { frame_color: "#3d4148" });
+  const door = info("d", 3, 0.9, 0, 2.05, { type: "door", frame_color: "#222326", leaf_color: "#a67a52", exterior: false });
+  setNaturalPalette(true);
+  try {
+    assert.ok(has(win, 0x3d4148));
+    assert.ok(has(door, 0x222326) && has(door, 0xa67a52));
+    // without own colours the style's stay
+    assert.ok(!has(info("p", 1, 1.2, 0.9, 2.2), 0x3d4148));
+  } finally {
+    setNaturalPalette(false);
+  }
+  // the neon looks keep their colours
+  assert.ok(!has(win, 0x3d4148));
 });

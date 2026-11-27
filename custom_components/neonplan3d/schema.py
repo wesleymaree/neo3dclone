@@ -155,6 +155,9 @@ OPENING_SCHEMA = vol.Schema(
         vol.Optional("top_hung", default=False): bool,
         # look: None = automatic (front door in an exterior wall, room door inside; plain window)
         vol.Optional("style", default=None): vol.Any(None, vol.In(_OPENING_STYLES)),
+        # fork: own colours of the frame (with a window's sashes) and of a door's leaf, in the homely styles
+        vol.Optional("frame_color"): vol.Any(None, vol.Match(r"^#[0-9a-fA-F]{6}$")),
+        vol.Optional("leaf_color"): vol.Any(None, vol.Match(r"^#[0-9a-fA-F]{6}$")),
         # a garage door: sectional (None) or up-and-over
         vol.Optional("garage_kind"): vol.Any(None, vol.In(["sectional", "tilt"])),
         # front doors with sidelights: one on the hinge side, and the widths (None = automatic)
