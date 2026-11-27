@@ -95,7 +95,7 @@ export async function readModel(files: File[]): Promise<ReadModel> {
   }
   const lib = await loadOcct();
   const bytes = new Uint8Array(await model.arrayBuffer());
-  const params = { linearUnit: "meter", linearDeflectionType: "bounding_box_ratio", linearDeflection: 0.002, angularDeflection: 0.5 };
+  const params = { linearUnit: "meter", linearDeflectionType: "bounding_box_ratio", linearDeflection: 0.001, angularDeflection: 0.35 };
   const res = /\.(iges|igs)$/i.test(model.name) ? lib.ReadIgesFile(bytes, params) : lib.ReadStepFile(bytes, params);
   if (!res.success) throw new Error("unreadable");
   return { raw: fromOcct(res.meshes), unit: "m", zUp: true, name };

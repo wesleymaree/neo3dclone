@@ -4,6 +4,7 @@
 // buffer and a soft contact shadow into the shadow layer, so furniture adds no draw calls.
 
 import { Color } from "three";
+import { featureEdges } from "../mesh-edges.ts";
 import type { Furniture, Vec2 } from "../model.ts";
 import { builtinBase, gangsOf, stairsULayout, POOL_VALVE_Y } from "../model.ts";
 import { adventCandles, isRobotVacuum, mountBase, packItem, packMotion, packMovingPart, packRobotCentre, packRobotPart, packScreen, packSpinAxis, type PackItem, type PackMesh, type PackMotion, type PackPart } from "../packs.ts";
@@ -91,62 +92,43 @@ const EDGE_GLOW = shade(0x37e0ff, 0.45);
 
 type Tf = (x: number, z: number) => Vec2;
 
-const meshEdgeCache = new WeakMap<PackMesh, Uint32Array>();
-/** Most outline segments drawn for one imported model. */
-const MAX_MESH_EDGES = 20000;
+const meshEdgeCache = new WeakMap<PackMesh, ArrayLike<number>>();
+const meshGlowCache = new WeakMap<PackMesh, Uint8Array>();
+
+/** The outline of an imported model: stored with it, or found once for a model imported before outlines were stored. */
+export function meshEdges(m: PackMesh): ArrayLike<number> {
+  if (m.e) return m.e;
+  let hit = meshEdgeCache.get(m);
+  if (!hit) meshEdgeCache.set(m, (hit = featureEdges(m.v, m.i)));
+  return hit;
+}
 
 /**
- * The outline of a mesh: edges where its faces meet at a sharp angle (over 35°), and open borders – as pairs of vertex
- * indices, found once per mesh. Vertices at the same place count as one (files split them along seams).
+ * The triangles of an imported lamp that glow in the light's colour: those in its lightest colour (a shade, a bulb),
+ * or all of them when the model has no colours of its own or none is light.
  */
-export function meshEdges(m: PackMesh): Uint32Array {
-  const hit = meshEdgeCache.get(m);
+export function meshGlow(m: PackMesh): Uint8Array {
+  let hit = meshGlowCache.get(m);
   if (hit) return hit;
-  const { v, i } = m;
-  const n = v.length / 3;
-  const same = new Map<string, number>();
-  const id = new Uint32Array(n);
-  for (let k = 0; k < n; k++) {
-    const key = `${Math.round(v[k * 3] * 65535)},${Math.round(v[k * 3 + 1] * 65535)},${Math.round(v[k * 3 + 2] * 65535)}`;
-    let j = same.get(key);
-    if (j === undefined) same.set(key, (j = k));
-    id[k] = j;
-  }
-  // per edge: its two ends, the first face's normal and how many faces share it
-  const seen = new Map<number, { a: number; b: number; nx: number; ny: number; nz: number; faces: number; sharp: boolean }>();
-  for (let t = 0; t + 2 < i.length; t += 3) {
-    const tri = [id[i[t]], id[i[t + 1]], id[i[t + 2]]];
-    const [p, q, r] = tri.map((x) => x * 3);
-    const ux = v[q] - v[p], uy = v[q + 1] - v[p + 1], uz = v[q + 2] - v[p + 2];
-    const wx = v[r] - v[p], wy = v[r + 1] - v[p + 1], wz = v[r + 2] - v[p + 2];
-    let nx = uy * wz - uz * wy, ny = uz * wx - ux * wz, nz = ux * wy - uy * wx;
-    const len = Math.hypot(nx, ny, nz);
-    if (len < 1e-14) continue;
-    nx /= len;
-    ny /= len;
-    nz /= len;
-    for (let e = 0; e < 3; e++) {
-      const a = tri[e];
-      const b = tri[(e + 1) % 3];
-      if (a === b) continue;
-      const key = Math.min(a, b) * 262144 + Math.max(a, b);
-      const old = seen.get(key);
-      if (!old) seen.set(key, { a, b, nx, ny, nz, faces: 1, sharp: false });
-      else {
-        old.faces++;
-        // the winding may differ between the two faces: compare the lines the normals lie on
-        if (Math.abs(old.nx * nx + old.ny * ny + old.nz * nz) < 0.82) old.sharp = true;
+  const tris = Math.floor(m.i.length / 3);
+  hit = new Uint8Array(tris).fill(1);
+  const c = m.c;
+  if (c) {
+    const lum = new Float32Array(tris);
+    let top = 0;
+    for (let t = 0; t < tris; t++) {
+      let sum = 0;
+      for (let k = 0; k < 3; k++) {
+        const v = m.i[t * 3 + k] * 3;
+        sum += 0.2126 * c[v] + 0.7152 * c[v + 1] + 0.0722 * c[v + 2];
       }
+      lum[t] = sum / 3 / 255;
+      top = Math.max(top, lum[t]);
     }
+    if (top >= 0.55) for (let t = 0; t < tris; t++) hit[t] = lum[t] >= top - 0.08 ? 1 : 0;
   }
-  const out: number[] = [];
-  for (const e of seen.values()) {
-    if (e.faces !== 2 || e.sharp) out.push(e.a, e.b);
-    if (out.length >= MAX_MESH_EDGES * 2) break;
-  }
-  const edges = new Uint32Array(out);
-  meshEdgeCache.set(m, edges);
-  return edges;
+  meshGlowCache.set(m, hit);
+  return hit;
 }
 
 class Builder {
@@ -181,7 +163,7 @@ class Builder {
    * A triangle mesh (fork: an imported model) in fractions of the box w × d × h standing at `y0`. Both sides of every
    * triangle are drawn (an imported file's winding cannot be trusted), each shaded by how it faces a light from above.
    */
-  mesh(m: PackMesh, w: number, d: number, h: number, y0: number, fallback: number): void {
+  mesh(m: PackMesh, w: number, d: number, h: number, y0: number, fallback: number, glow: number | null = null): void {
     const { v, i, c } = m;
     const n = v.length / 3;
     const pos = new Float32Array(n * 3);
@@ -194,6 +176,9 @@ class Builder {
     const plain = new Color(fallback);
     const front = new Color();
     const back = new Color();
+    // a lamp: its glowing triangles take the light's colour (the sentinel the viewer recolours)
+    const lit = glow === null ? null : meshGlow(m);
+    const glowColor = glow === null ? null : new Color(glow);
     for (let t = 0; t + 2 < i.length; t += 3) {
       const a = i[t] * 3;
       const b = i[t + 1] * 3;
@@ -204,10 +189,11 @@ class Builder {
       const len = Math.hypot(nx, ny, nz);
       if (len < 1e-12) continue;
       // light from above, a little from the front right
-      const lit = (nx * 0.35 + ny * 0.85 + nz * 0.4) / len;
-      if (c) plain.setRGB(((c[a] + c[b] + c[e]) / 3) / 255, ((c[a + 1] + c[b + 1] + c[e + 1]) / 3) / 255, ((c[a + 2] + c[b + 2] + c[e + 2]) / 3) / 255);
-      const kf = 0.5 + 0.5 * Math.max(0, lit);
-      const kb = 0.5 + 0.5 * Math.max(0, -lit);
+      const light = (nx * 0.35 + ny * 0.85 + nz * 0.4) / len;
+      if (lit && glowColor && lit[t / 3]) plain.copy(glowColor);
+      else if (c) plain.setRGB(((c[a] + c[b] + c[e]) / 3) / 255, ((c[a + 1] + c[b + 1] + c[e + 1]) / 3) / 255, ((c[a + 2] + c[b + 2] + c[e + 2]) / 3) / 255);
+      const kf = 0.5 + 0.5 * Math.max(0, light);
+      const kb = 0.5 + 0.5 * Math.max(0, -light);
       front.setRGB(Math.min(1, plain.r * kf), Math.min(1, plain.g * kf), Math.min(1, plain.b * kf));
       back.setRGB(Math.min(1, plain.r * kb), Math.min(1, plain.g * kb), Math.min(1, plain.b * kb));
       const A = [pos[a], pos[a + 1], pos[a + 2]];
@@ -2087,7 +2073,7 @@ function packModel(
 ): void {
   const onlyGlow = !!only;
   // fork: an imported model's mesh, in its own colours or the body colour (a finish recolours it)
-  if (item.mesh && !only) b.mesh(item.mesh, w, d, h, base, item.mesh.c ? 0xffffff : (finish?.body ?? C.body));
+  if (item.mesh && !only) b.mesh(item.mesh, w, d, h, base, item.mesh.c ? 0xffffff : (finish?.body ?? C.body), glow);
   const advent = item.parts.some((p) => p.advent) ? adventCandles() : 4;
   for (const q of fitParts(item, w, d, h)) {
     if (skip?.(q)) continue;

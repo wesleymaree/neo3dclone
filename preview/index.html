@@ -408,6 +408,9 @@
               ownModels = [...ownModels, { ...msg.model, name: msg.model.name.trim(), id }];
               return { id, name: msg.model.name.trim() };
             }
+            case "neonplan3d/models/update":
+              ownModels = ownModels.map((m) => (m.id === msg.model_id ? { ...m, ...msg.changes } : m));
+              return null;
             case "neonplan3d/models/remove":
               ownModels = ownModels.filter((m) => m.id !== msg.model_id);
               return null;

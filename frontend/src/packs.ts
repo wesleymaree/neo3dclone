@@ -139,6 +139,8 @@ export interface PackMesh {
   v: Float32Array;
   i: Uint16Array | Uint32Array;
   c: Uint8Array | null;
+  /** Outline as pairs of vertex indices, found on import; null for older models (found when drawn). */
+  e: Uint16Array | Uint32Array | null;
 }
 
 export interface FurniturePack {

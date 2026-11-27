@@ -57,6 +57,20 @@ KINDS = [
     "architecture",
 ]
 
+# what a model is: decides what a linked entity does with it (a lamp glows, a TV shows its picture)
+MODEL_KINDS = [
+    "furniture",
+    "lamp_ceiling",
+    "lamp_pendant",
+    "lamp_floor",
+    "lamp_table",
+    "lamp_wall",
+    "lamp_strip",
+    "tv",
+    "appliance",
+    "sensor",
+]
+
 _METRES = vol.All(vol.Coerce(float), vol.Range(min=0.01, max=50))
 _B64 = vol.All(str, vol.Length(min=4, max=_MAX_B64), vol.Match(r"^[A-Za-z0-9+/]+={0,2}$"))
 
@@ -67,6 +81,9 @@ MESH_SCHEMA = vol.Schema(
         vol.Required("v"): _B64,
         vol.Required("i"): _B64,
         vol.Optional("c"): _B64,
+        # the outline: m pairs of vertex indices (none when switched off)
+        vol.Optional("e"): _B64,
+        vol.Optional("m"): vol.All(int, vol.Range(min=0, max=MAX_TRIANGLES * 3)),
     }
 )
 
@@ -75,7 +92,17 @@ MODEL_SCHEMA = vol.Schema(
         vol.Required("name"): vol.All(str, vol.Strip, vol.Length(min=1, max=80)),
         vol.Required("size"): vol.All([_METRES], vol.Length(min=3, max=3)),
         vol.Optional("group", default="deco"): vol.In(KINDS),
+        vol.Optional("kind", default="furniture"): vol.In(MODEL_KINDS),
         vol.Required("mesh"): MESH_SCHEMA,
+    }
+)
+
+# what can be changed on a model after its import
+CHANGES_SCHEMA = vol.Schema(
+    {
+        vol.Optional("name"): vol.All(str, vol.Strip, vol.Length(min=1, max=80)),
+        vol.Optional("group"): vol.In(KINDS),
+        vol.Optional("kind"): vol.In(MODEL_KINDS),
     }
 )
 
@@ -101,6 +128,8 @@ def check_mesh(mesh: dict[str, Any]) -> None:
         raise MeshError("indices do not match the triangle count")
     if "c" in mesh and _decoded_length(mesh["c"]) != n * 3:
         raise MeshError("colours do not match the vertex count")
+    if "e" in mesh and _decoded_length(mesh["e"]) != mesh.get("m", -1) * 2 * index_size:
+        raise MeshError("the outline does not match its count")
 
 
 class ModelStore:
@@ -127,6 +156,16 @@ class ModelStore:
         self.models = [*self.models, entry]
         await self._store.async_save({"models": self.models})
         return entry
+
+    async def async_update(self, model_id: str, changes: dict[str, Any]) -> dict[str, Any] | None:
+        """Change a model's name, category or kind; None when there is no such model."""
+        model = next((m for m in self.models if m["id"] == model_id), None)
+        if model is None:
+            return None
+        changed = {**model, **changes}
+        self.models = [changed if m["id"] == model_id else m for m in self.models]
+        await self._store.async_save({"models": self.models})
+        return changed
 
     async def async_remove(self, model_id: str) -> bool:
         """Remove a model (furniture using it stays in the plan as a plain box)."""
@@ -174,6 +213,31 @@ async def ws_models_add(hass: HomeAssistant, connection: websocket_api.ActiveCon
 
 
 @websocket_api.websocket_command(
+    {
+        vol.Required("type"): "neonplan3d/models/update",
+        vol.Required("model_id"): vol.All(str, vol.Length(max=32)),
+        vol.Required("changes"): dict,
+    }
+)
+@websocket_api.require_admin
+@websocket_api.async_response
+async def ws_models_update(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
+) -> None:
+    """Rename a model, or change its category or kind."""
+    try:
+        changes = CHANGES_SCHEMA(msg["changes"])
+    except vol.Invalid as err:
+        connection.send_error(msg["id"], "invalid_model", str(err))
+        return
+    store = await _models(hass)
+    if await store.async_update(msg["model_id"], changes) is None:
+        connection.send_error(msg["id"], "not_found", "Model not found")
+        return
+    connection.send_result(msg["id"])
+
+
+@websocket_api.websocket_command(
     {vol.Required("type"): "neonplan3d/models/remove", vol.Required("model_id"): vol.All(str, vol.Length(max=32))}
 )
 @websocket_api.require_admin
@@ -189,4 +253,4 @@ async def ws_models_remove(
     connection.send_result(msg["id"])
 
 
-COMMANDS = (ws_models_list, ws_models_add, ws_models_remove)
+COMMANDS = (ws_models_list, ws_models_add, ws_models_update, ws_models_remove)

@@ -171,10 +171,10 @@ import { deleteDiagnostics, getDiagnostics, setDiagnostics, type DiagnosticsStat
 import { load3d } from "../load3d.ts";
 import "./library.ts";
 import { basicTypes, buildIndex, KINDS, roomKindOf, shopText, type LibraryEntry, type Previews } from "../library-index.ts";
-import { addModel, getPreviews, removeModel } from "../api.ts";
+import { addModel, getPreviews, removeModel, updateModel } from "../api.ts";
 import { loadModels } from "../load-models.ts";
 import type { Prepared, ReadModel, Unit } from "../models/entry.ts";
-import { OWN_PACK_ID } from "../own-models.ts";
+import { KIND_GROUP, modelKindOf, MODEL_KINDS, OWN_PACK_ID, type ModelKind } from "../own-models.ts";
 import { packsVersion as libPacksVersion } from "../packs.ts";
 import type { WallMode } from "../viewer/viewer3d.ts";
 import { furnitureName } from "../furniture-names.ts";
@@ -192,6 +192,9 @@ interface ModelDraft {
   read: ReadModel | null;
   name: string;
   group: string;
+  kind: ModelKind;
+  /** Draw its sharp edges as glowing lines. */
+  outline: boolean;
   unit: Unit;
   zUp: boolean;
   prepared: Prepared | null;
@@ -13712,6 +13715,17 @@ export class Fp3dEditor extends LitElement {
         ? html`<div class="fp3d-model-form">
             <label>${this.t("model_name")} <input type="text" maxlength="80" .value=${draft.name} @input=${(e: Event) => set({ name: (e.target as HTMLInputElement).value })} /></label>
             <label
+              >${this.t("model_kind")}
+              <select @change=${(e: Event) => {
+                // a lamp goes among the lamps, a TV among the media … unless a category was picked by hand
+                const kind = (e.target as HTMLSelectElement).value as ModelKind;
+                set({ kind, group: draft.group === KIND_GROUP[draft.kind] ? KIND_GROUP[kind] : draft.group });
+              }}>
+                ${MODEL_KINDS.map((k) => html`<option value=${k} ?selected=${draft.kind === k}>${this.t(`model_kind_${k}` as I18nKey)}</option>`)}
+              </select>
+              <span class="fp3d-sub">${this.t(`model_kind_${draft.kind}_hint` as I18nKey)}</span></label
+            >
+            <label
               >${this.t("model_group")}
               <select @change=${(e: Event) => set({ group: (e.target as HTMLSelectElement).value })}>
                 ${KINDS.map((k) => html`<option value=${k} ?selected=${draft.group === k}>${this.t(`lib_kind_${k}` as I18nKey)}</option>`)}
@@ -13724,6 +13738,7 @@ export class Fp3dEditor extends LitElement {
               </select></label
             >
             <label class="fp3d-check"><input type="checkbox" .checked=${draft.zUp} @change=${(e: Event) => set({ zUp: (e.target as HTMLInputElement).checked })} /> ${this.t("model_z_up")}</label>
+            <label class="fp3d-check"><input type="checkbox" .checked=${draft.outline} @change=${(e: Event) => set({ outline: (e.target as HTMLInputElement).checked })} /> ${this.t("model_outline")}</label>
             ${draft.prepared
               ? html`<span class="fp3d-sub">${this.t("model_size", { size: metres(draft.prepared.size), n: draft.prepared.triangles.toLocaleString(lang) })}${draft.prepared.simplified ? ` · ${this.t("model_simplified")}` : ""}</span>`
               : nothing}
@@ -13740,6 +13755,9 @@ export class Fp3dEditor extends LitElement {
       ${own.map(
         (it) => html`<span class="fp3d-model-row"
           ><span>${packItemName(it, lang)} <span class="fp3d-sub">${metres(it.size)} m</span></span>
+          <select title=${this.t("model_kind")} aria-label=${this.t("model_kind")} @change=${(e: Event) => void this.changeOwnModel(it.id, { kind: (e.target as HTMLSelectElement).value as ModelKind })}>
+            ${MODEL_KINDS.map((k) => html`<option value=${k} ?selected=${modelKindOf(it) === k}>${this.t(`model_kind_${k}` as I18nKey)}</option>`)}
+          </select>
           <button class="fp3d-btn" title=${this.t("delete")} @click=${() => void this.removeOwnModel(it.id, packItemName(it, lang))}>✕</button></span
         >`,
       )}
@@ -13754,7 +13772,7 @@ export class Fp3dEditor extends LitElement {
     const files = [...(input.files ?? [])];
     input.value = "";
     if (!files.length) return;
-    const empty: ModelDraft = { read: null, name: "", group: "deco", unit: "m", zUp: false, prepared: null, busy: true, error: null };
+    const empty: ModelDraft = { read: null, name: "", group: "deco", kind: "furniture", outline: true, unit: "m", zUp: false, prepared: null, busy: true, error: null };
     this._modelImport = empty;
     try {
       const lib = (this.modelsLib ??= await loadModels());
@@ -13774,9 +13792,9 @@ export class Fp3dEditor extends LitElement {
     const read = old?.read;
     if (!old || !read || !this.modelsLib) return;
     const next: ModelDraft = { ...old, ...patch, error: null };
-    if (!old.prepared || patch.unit !== undefined || patch.zUp !== undefined) {
+    if (!old.prepared || patch.unit !== undefined || patch.zUp !== undefined || patch.outline !== undefined) {
       try {
-        next.prepared = this.modelsLib.prepare(read.raw, next.unit, next.zUp);
+        next.prepared = this.modelsLib.prepare(read.raw, next.unit, next.zUp, next.outline);
       } catch {
         next.prepared = null;
         next.error = this.t("model_error_detail");
@@ -13790,12 +13808,25 @@ export class Fp3dEditor extends LitElement {
     if (!draft?.prepared || !this.hass) return;
     this._modelImport = { ...draft, busy: true, error: null };
     try {
-      await addModel(this.hass, { name: draft.name.trim(), size: draft.prepared.size, group: draft.group, mesh: draft.prepared.mesh });
+      await addModel(this.hass, { name: draft.name.trim(), size: draft.prepared.size, group: draft.group, kind: draft.kind, mesh: draft.prepared.mesh });
       this._modelImport = null;
       this.dispatchEvent(new CustomEvent("packs-changed", { bubbles: true, composed: true }));
     } catch (err) {
       const code = (err as { code?: string } | null)?.code;
       this._modelImport = { ...draft, busy: false, error: this.t(code === "unknown_command" ? "model_error_restart" : "model_error_save") };
+    }
+  }
+
+  /** What an imported model is, changed afterwards (furniture placed with it follows at once). */
+  private async changeOwnModel(id: string, changes: { kind: ModelKind }): Promise<void> {
+    if (!this.hass) return;
+    try {
+      await updateModel(this.hass, id, changes);
+    } catch (err) {
+      const code = (err as { code?: string } | null)?.code;
+      alert(this.t(code === "unknown_command" ? "model_error_restart" : "model_error_save"));
+    } finally {
+      this.dispatchEvent(new CustomEvent("packs-changed", { bubbles: true, composed: true }));
     }
   }
 
@@ -17997,7 +18028,13 @@ export class Fp3dEditor extends LitElement {
         gap: 8px;
         min-width: 0;
       }
+      .fp3d-model-row select {
+        flex: 0 1 45%;
+        min-width: 0;
+      }
       .fp3d-model-row > span {
+        flex: 1 1 auto;
+        min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
       }

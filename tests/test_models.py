@@ -48,6 +48,32 @@ async def test_add_list_and_remove_a_model(hass: HomeAssistant, hass_ws_client, 
     assert missing["error"]["code"] == "not_found"
 
 
+async def test_a_model_keeps_its_outline_and_kind_and_can_change(hass: HomeAssistant, hass_ws_client) -> None:
+    await _setup(hass)
+    client = await hass_ws_client(hass)
+    mesh = {**TRIANGLE, "e": _b64(struct.pack("<2H", 0, 1)), "m": 1}
+    model = {"name": "Lamp", "size": [0.4, 0.4, 1.6], "group": "lamp", "kind": "lamp_floor", "mesh": mesh}
+    added = (await _ws(client, type="neonplan3d/models/add", model=model))["result"]
+    changes = {"name": "Reading lamp", "kind": "lamp_table"}
+    assert (await _ws(client, type="neonplan3d/models/update", model_id=added["id"], changes=changes))["success"]
+    listed = (await _ws(client, type="neonplan3d/models/list"))["result"]["models"][0]
+    assert (listed["name"], listed["kind"], listed["group"], listed["mesh"]["m"]) == (
+        "Reading lamp",
+        "lamp_table",
+        "lamp",
+        1,
+    )
+    bad = await _ws(client, type="neonplan3d/models/update", model_id=added["id"], changes={"kind": "rocket"})
+    assert bad["error"]["code"] == "invalid_model"
+    gone = await _ws(client, type="neonplan3d/models/update", model_id="nope", changes={"name": "X"})
+    assert gone["error"]["code"] == "not_found"
+    # an older model without a kind is plain furniture
+    plain = await _ws(client, type="neonplan3d/models/add", model={"name": "Box", "size": [1, 1, 1], "mesh": TRIANGLE})
+    assert plain["success"]
+    kinds = [m["kind"] for m in (await _ws(client, type="neonplan3d/models/list"))["result"]["models"]]
+    assert kinds == ["lamp_table", "furniture"]
+
+
 async def test_a_mesh_must_match_its_counts(hass: HomeAssistant, hass_ws_client) -> None:
     await _setup(hass)
     client = await hass_ws_client(hass)
@@ -56,6 +82,7 @@ async def test_a_mesh_must_match_its_counts(hass: HomeAssistant, hass_ws_client)
         {**TRIANGLE, "t": 2},
         {**TRIANGLE, "c": _b64(bytes(3))},
         {**TRIANGLE, "v": "not base64!"},
+        {**TRIANGLE, "e": _b64(struct.pack("<2H", 0, 1)), "m": 2},
     ):
         res = await _ws(client, type="neonplan3d/models/add", model={"name": "X", "size": [1, 1, 1], "mesh": mesh})
         assert res["error"]["code"] == "invalid_model", mesh

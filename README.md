@@ -72,11 +72,18 @@ Copy `custom_components/neonplan3d` into `/config/custom_components/` on your Ho
 2. Choose the file:
    - **OBJ:** select the `.obj` and its `.mtl` together to keep the colours. Without the `.mtl` the model takes the furniture colour of the current look.
    - **STEP / STP / IGES:** CAD files are converted in the browser with [OpenCascade](https://dev.opencascade.org/) (about 8 MB, loaded only while you import).
-3. Check the name, the category (where it appears in the library), the unit of the file and whether the Z axis points up. The size it will get is shown underneath.
-4. Click **Add to the library**. The model now appears in its category and is placed like any other piece of furniture.
+3. Pick **What is it?** This decides what a linked entity does with the model:
+   - **Furniture or decoration:** it glows while the linked entity is on.
+   - **Ceiling, pendant, floor, table or wall light, or LED strip:** it shines in the colour and brightness of the linked light, and its lightest parts glow.
+   - **TV or screen:** its front shows the colour and picture of the linked media player.
+   - **Electric appliance:** it takes a switch and a power sensor.
+   - **Sensor:** it follows its own sensor (motion, contact, temperature …).
+4. Check the name, the category (where it appears in the library), the unit of the file, whether the Z axis points up, and whether its edges are drawn as glowing lines. The size it will get is shown underneath.
+5. Click **Add to the library**. The model now appears in its category and is placed like any other piece of furniture.
 
 - Models with more than 50,000 triangles are simplified automatically.
 - The models are stored in Home Assistant (`.storage/neonplan3d.models`) and show on every dashboard.
+- To change what an imported model is, pick it again in the list in the same box. Furniture already placed with it follows at once.
 - To delete a model, use ✕ next to it in the same box. Furniture already placed with it becomes a plain box.
 
 ## 🧩 Dashboard card

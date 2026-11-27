@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { decodeMesh, modelsPack, OWN_PACK_ID } from "../own-models.ts";
+import { decodeMesh, modelKindOf, modelsPack, OWN_PACK_ID } from "../own-models.ts";
 import { meshEdges } from "../viewer/furniture.ts";
 import { guessUnit, parseMtl, parseObj, prepare, simplify, type RawMesh } from "./mesh.ts";
 
@@ -92,4 +92,40 @@ test("a model with too many triangles is simplified", () => {
   const small = simplify(raw, 5000);
   assert.ok(small.idx.length / 3 <= 5000 && small.idx.length / 3 > 500);
   assert.ok(prepare(raw, "m", false).triangles === 28800);
+});
+
+test("the outline keeps sharp creases only: no open borders, nothing when switched off", () => {
+  // an open box (no lid): its rim is a border, the four bottom edges and four upright corners are creases
+  const raw = parseObj(BOX_OBJ.replace("f 5 8 7 6\n", ""));
+  const p = prepare(raw, "cm", false);
+  assert.equal(p.mesh.m, 8);
+  assert.equal(meshEdges(decodeMesh(p.mesh)).length / 2, 8);
+  const off = prepare(raw, "cm", false, false);
+  assert.equal(off.mesh.m, 0);
+  assert.equal(off.mesh.e, undefined);
+  assert.equal(meshEdges(decodeMesh(off.mesh)).length, 0);
+  // a flat sheet has no outline at all
+  const sheet = parseObj("v 0 0 0\nv 1 0 0\nv 1 0 1\nv 0 0 1\nf 1 2 3 4\n");
+  assert.equal(prepare(sheet, "m", false).mesh.m, 0);
+});
+
+test("what a model is decides how it behaves", () => {
+  const p = prepare(parseObj(BOX_OBJ), "cm", false);
+  const make = (kind: string) => modelsPack([{ id: kind, name: kind, size: p.size, kind: kind as never, mesh: p.mesh }])!.items[0];
+  assert.equal(make("lamp_floor").light, "floor");
+  assert.deepEqual([make("lamp_ceiling").light, make("lamp_ceiling").mount], ["ceiling", "ceiling"]);
+  assert.equal(make("lamp_wall").mount, "wall");
+  const tv = make("tv");
+  assert.ok(tv.electric && tv.parts.some((x) => x.screen));
+  assert.ok(make("appliance").electric);
+  assert.equal(make("sensor").family, "sensor");
+  const plain = make("furniture");
+  assert.ok(!plain.light && !plain.electric && !plain.parts.length);
+  assert.equal(modelKindOf(make("tv")), "tv");
+  // older models have no kind: plain furniture
+  const old = modelsPack([{ id: "old", name: "Old", size: p.size, mesh: { ...p.mesh, e: undefined, m: undefined } }])!.items[0];
+  assert.equal(modelKindOf(old), "furniture");
+  assert.equal(old.mesh?.e, null);
+  // its outline is then found when drawn, with the same rules
+  assert.equal(meshEdges(old.mesh!).length / 2, 12);
 });

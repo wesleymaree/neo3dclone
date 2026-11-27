@@ -1,6 +1,7 @@
 // Fork: turning a model file's triangles into furniture – units, the up axis, the item's box, simplifying, and the
 // compact form the backend keeps (models.py). Pure functions, tested in mesh.test.ts.
 
+import { featureEdges } from "../mesh-edges.ts";
 import type { StoredMesh } from "../own-models.ts";
 
 /** Triangles as read from a file: xyz per vertex, three indices per triangle, optional rgb (0..1) per vertex. */
@@ -178,10 +179,10 @@ export interface Prepared {
 }
 
 /**
- * The model as furniture: turned so y is up (a file with z up is turned forward), scaled to metres, fitted into its box
+ * The model as furniture (with its outline unless `outline` is false): turned so y is up (a file with z up is turned forward), scaled to metres, fitted into its box
  * (x and z from -0.5 to 0.5 around the middle, y from 0 at its bottom) and quantised to 16 bits.
  */
-export function prepare(raw: RawMesh, unit: Unit, zUp: boolean): Prepared {
+export function prepare(raw: RawMesh, unit: Unit, zUp: boolean, outline = true): Prepared {
   const small = simplify(raw);
   const n = small.pos.length / 3;
   const s = METRES[unit];
@@ -208,6 +209,10 @@ export function prepare(raw: RawMesh, unit: Unit, zUp: boolean): Prepared {
   const index = n <= 65535 ? new Uint16Array(small.idx) : new Uint32Array(small.idx);
   const mesh: StoredMesh = { n, t: small.idx.length / 3, v: base64(new Uint8Array(q.buffer)), i: base64(new Uint8Array(index.buffer)) };
   if (small.col) mesh.c = base64(Uint8Array.from(small.col, (x) => Math.round(Math.min(1, Math.max(0, x)) * 255)));
+  // the outline along its sharp edges, found here in metres (true angles); none when switched off
+  const edges = outline ? featureEdges(p, small.idx) : [];
+  mesh.m = edges.length / 2;
+  if (edges.length) mesh.e = base64(new Uint8Array((n <= 65535 ? new Uint16Array(edges) : new Uint32Array(edges)).buffer));
   // at least a centimetre each way, so a flat model (a picture, a rug) stays placeable
   const size = [span[0], span[2], span[1]].map((m) => Math.max(0.01, Math.round(m * 1000) / 1000)) as [number, number, number];
   return { size, mesh, triangles: mesh.t, simplified: small !== raw };

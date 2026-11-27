@@ -285,6 +285,10 @@ export function addModel(hass: HomeAssistant, model: Omit<OwnModel, "id" | "crea
   return hass.callWS<{ id: string; name: string }>({ type: "neonplan3d/models/add", model });
 }
 
+export function updateModel(hass: HomeAssistant, modelId: string, changes: Partial<Pick<OwnModel, "name" | "group" | "kind">>): Promise<void> {
+  return hass.callWS<void>({ type: "neonplan3d/models/update", model_id: modelId, changes });
+}
+
 export function removeModel(hass: HomeAssistant, modelId: string): Promise<void> {
   return hass.callWS<void>({ type: "neonplan3d/models/remove", model_id: modelId });
 }
