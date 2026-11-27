@@ -183,7 +183,22 @@ export interface Prepared {
  * (x and z from -0.5 to 0.5 around the middle, y from 0 at its bottom) and quantised to 16 bits.
  */
 export function prepare(raw: RawMesh, unit: Unit, zUp: boolean, outline = true): Prepared {
-  const small = simplify(raw);
+  // Home Assistant takes messages up to 4 MiB: a model that would come near it is simplified further
+  for (let max = MAX_TRIANGLES; ; max = Math.floor(max * 0.7)) {
+    const out = prepareAt(raw, unit, zUp, outline, max);
+    if (storedSize(out.mesh) <= MAX_STORED || max < 2000) return out;
+  }
+}
+
+/** Most characters a stored model may have (its base64 parts together), well below Home Assistant's 4 MiB. */
+export const MAX_STORED = 3_000_000;
+
+export function storedSize(m: StoredMesh): number {
+  return m.v.length + m.i.length + (m.c?.length ?? 0) + (m.e?.length ?? 0);
+}
+
+function prepareAt(raw: RawMesh, unit: Unit, zUp: boolean, outline: boolean, maxTriangles: number): Prepared {
+  const small = simplify(raw, maxTriangles);
   const n = small.pos.length / 3;
   const s = METRES[unit];
   const p = new Float64Array(n * 3);

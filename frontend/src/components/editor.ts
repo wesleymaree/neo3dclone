@@ -13812,9 +13812,19 @@ export class Fp3dEditor extends LitElement {
       this._modelImport = null;
       this.dispatchEvent(new CustomEvent("packs-changed", { bubbles: true, composed: true }));
     } catch (err) {
-      const code = (err as { code?: string } | null)?.code;
-      this._modelImport = { ...draft, busy: false, error: this.t(code === "unknown_command" ? "model_error_restart" : "model_error_save") };
+      this._modelImport = { ...draft, busy: false, error: this.modelSaveError(err) };
     }
+  }
+
+  /**
+   * Why a model was not saved: a backend older than this editor (not restarted after an update) does not know the
+   * command or the new fields – then a restart helps; otherwise Home Assistant's own reason is shown.
+   */
+  private modelSaveError(err: unknown): string {
+    const { code, message } = (err ?? {}) as { code?: string | number; message?: string };
+    if (code === "unknown_command" || /extra keys not allowed/i.test(message ?? "")) return this.t("model_error_restart");
+    const why = message || (typeof code === "string" ? code : "") || (code === 3 ? this.t("model_error_lost") : "");
+    return why ? `${this.t("model_error_save")} (${why})` : this.t("model_error_save");
   }
 
   /** What an imported model is, changed afterwards (furniture placed with it follows at once). */
@@ -13823,8 +13833,7 @@ export class Fp3dEditor extends LitElement {
     try {
       await updateModel(this.hass, id, changes);
     } catch (err) {
-      const code = (err as { code?: string } | null)?.code;
-      alert(this.t(code === "unknown_command" ? "model_error_restart" : "model_error_save"));
+      alert(this.modelSaveError(err));
     } finally {
       this.dispatchEvent(new CustomEvent("packs-changed", { bubbles: true, composed: true }));
     }
