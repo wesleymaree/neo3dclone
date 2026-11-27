@@ -9,7 +9,7 @@ import type { HomeAssistant } from "./types.ts";
 import { stationRain, weatherEntity } from "./weather.ts";
 import { hasFeature } from "./features.ts";
 import { isOutage } from "./outage.ts";
-import { doorsOf, fridgeOpenTooLong } from "./household.ts";
+import { doorsOf, fridgeOpenTooLong, isFridge } from "./household.ts";
 import { pointInPolygon } from "./model.ts";
 
 export { isOutage };
@@ -65,7 +65,7 @@ export function alertSources(hass: HomeAssistant, building: Building, weatherId?
   const fridges = hasFeature("household")
     ? building.floors.flatMap((floor) =>
         floor.furniture
-          .filter((f) => (f.type === "fridge" || f.type === "fridge_smart") && doorsOf(f).length)
+          .filter((f) => isFridge(f.type) && doorsOf(f).length)
           .map((f) => ({ floorId: floor.id, roomId: floor.rooms.find((r) => r.points.length >= 3 && pointInPolygon([f.x, f.z], r.points))?.id ?? null, furnitureId: f.id, ids: doorsOf(f) })),
       )
     : [];

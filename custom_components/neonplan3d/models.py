@@ -68,6 +68,12 @@ MODEL_KINDS = [
     "lamp_strip",
     "tv",
     "appliance",
+    "washer",
+    "dryer",
+    "dishwasher",
+    "oven",
+    "fridge",
+    "plant",
     "sensor",
 ]
 

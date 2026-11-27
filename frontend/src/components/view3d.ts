@@ -46,7 +46,7 @@ import { roomTiles } from "../room-bar.ts";
 import { alertColor, alertEntities, alertSources, alertText, findAlerts, isOutage, type Alert, type AlertSources } from "../alerts.ts";
 import { iconPath, iconSvg, mdiIcon } from "../icons.ts";
 import { neonSignPicture, signLight, signLines } from "../neon-sign.ts";
-import { applianceIdle, applianceOf, type ApplianceKind, binColors, calendarItems, type DayEvent, fetchDayEvents, binDue, binNext, binOut, binOutToggleable, binTagsShown, doorsOf, fetchPickups, FinishedMemory, fridgeOpenTooLong, groupTags, hassCountry, isFinishedState, mailboxPost, nextFridgeCheck, plantThirsty, remainingMinutes, remainingText, servicesDue, setHouseholdCountry, wasteCalendars, isPackPlant, type HouseholdItem, type HouseholdTag, type Pickup } from "../household.ts";
+import { applianceIdle, applianceOf, type ApplianceKind, binColors, calendarItems, type DayEvent, fetchDayEvents, binDue, binNext, binOut, binOutToggleable, binTagsShown, doorsOf, fetchPickups, FinishedMemory, fridgeOpenTooLong, groupTags, isFridge, hassCountry, isFinishedState, mailboxPost, nextFridgeCheck, plantThirsty, remainingMinutes, remainingText, servicesDue, setHouseholdCountry, wasteCalendars, isPackPlant, type HouseholdItem, type HouseholdTag, type Pickup } from "../household.ts";
 import { deviceSensors, energySummary, pvWithStrings, stringsPower, fetchSolarRows, fetchTodayChange, fieldLevels, fieldPowers, findConsumers, flowColor, flowSegments, gridPoint, powerSensorFor, readPower, solarCurvePath, solarDayFromStats, type Consumer, type EnergySummary, type StatRow } from "../energy.ts";
 import { fieldFace, fieldSize, roofFaces, roofWindowRoom } from "../solar.ts";
 import { type CustomButton, type EntityRef, DEFAULT_HOLOGRAM, lockAlong, type PoolPipe, type RoofWindow, type SolarField, uid } from "../model.ts";
@@ -3134,7 +3134,7 @@ export class Fp3dView3d extends LitElement {
             today.push({ icon: "wrench-outline", text: id === f.service ? translate(hass, "hh_service", { name }) : translate(hass, "hh_service2", { name, what: entityName(hass, id) }), entity: id });
           }
           // a fridge door standing open too long: the fridge glows icy blue (the warning shows at the top)
-          if ((f.type === "fridge" || f.type === "fridge_smart") && fridgeOpenTooLong(f, hass)) {
+          if (isFridge(f.type) && fridgeOpenTooLong(f, hass)) {
             screens.set(f.id, { color: [0.45, 0.85, 1], level: 1, faces: [{ part: "band", color: [0.45, 0.85, 1], level: 1 }] });
             today.push({ icon: "fridge-alert-outline", text: translate(hass, "hh_fridge_open", { name: f.name || furnitureName(hass, f.type) }), entity: doorsOf(f)[0] ?? null });
           }

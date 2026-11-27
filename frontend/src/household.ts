@@ -8,6 +8,7 @@
  * a mailbox glows while post lies in it.
  */
 import type { EntityRef, Furniture } from "./model.ts";
+import { ownKind } from "./own-models.ts";
 import type { HassEntity, HomeAssistant } from "./types.ts";
 import { packItem } from "./packs.ts";
 
@@ -22,6 +23,8 @@ export interface HouseholdItem {
 
 /** A pack item that is a plant: most of its parts are leaves or a pot. */
 export function isPackPlant(type: string): boolean {
+  // fork: an imported model set to "plant"
+  if (ownKind(type, packItem(type)) === "plant") return true;
   const item = packItem(type);
   if (!item) return false;
   // named or tagged as a plant (the Deco pack's plants have leaf colours of their own, #712)
@@ -561,13 +564,27 @@ export type ApplianceKind = "washer" | "dryer" | "dishwasher" | "oven";
  */
 export function applianceOf(type: string): ApplianceKind | null {
   if (type === "washer" || type === "dryer" || type === "dishwasher") return type;
-  const id = packItem(type)?.id;
+  const item = packItem(type);
+  // fork: an imported model says what it is
+  const own = ownKind(type, item);
+  if (own) return own === "washer" || own === "dryer" || own === "dishwasher" || own === "oven" ? own : null;
+  const id = item?.id;
   if (!id) return null;
   if (/dishwasher|geschirr/.test(id)) return "dishwasher";
   if (/dryer|trockner/.test(id)) return "dryer";
   if (/washer|washing|waschmaschine/.test(id)) return "washer";
   if (/oven|cooker|backofen/.test(id)) return "oven";
   return null;
+}
+
+/** A fridge that warns when its door stands open: the built-in ones, and an imported model set to "fridge" (fork). */
+export function isFridge(type: string): boolean {
+  return type === "fridge" || type === "fridge_smart" || ownKind(type, packItem(type)) === "fridge";
+}
+
+/** A fridge with one door sensor (not the smart fridge with its two doors). */
+export function isPlainFridge(type: string): boolean {
+  return type !== "fridge_smart" && isFridge(type);
 }
 
 /** The number of an entity's state, when it is one. */
@@ -690,7 +707,7 @@ export function fridgeOpenTooLong(f: Pick<Furniture, "door_left" | "door_right" 
 export function nextFridgeCheck(items: readonly Furniture[], hass: HomeAssistant, now = Date.now()): number | null {
   let next: number | null = null;
   for (const f of items) {
-    if (f.type !== "fridge" && f.type !== "fridge_smart") continue;
+    if (!isFridge(f.type)) continue;
     for (const id of doorsOf(f)) {
       const st = hass.states[id];
       if (!isOpen(st) || !st?.last_changed) continue;

@@ -79,6 +79,9 @@ Copy `custom_components/neonplan3d` into `/config/custom_components/` on your Ho
    - **Ceiling, pendant, floor, table or wall light, or LED strip:** it shines in the colour and brightness of the linked light, and its lightest parts glow.
    - **TV or screen:** its front shows the colour and picture of the linked media player.
    - **Electric appliance:** it takes a switch and a power sensor.
+   - **Washing machine, dryer, dishwasher or oven:** with a time-left sensor it shows the time left and "Done!" until the door is opened (Household).
+   - **Fridge:** with a door sensor it warns when the door stands open too long (Household).
+   - **Plant:** with a moisture sensor it shows when it needs water (Household).
    - **Sensor:** it follows its own sensor (motion, contact, temperature …).
 4. Check the name, the category (where it appears in the library), the unit of the file, whether the Z axis points up, and whether its edges are drawn as glowing lines. The size it will get is shown underneath.
 5. Click **Add to the library**. The model now appears in its category and is placed like any other piece of furniture.

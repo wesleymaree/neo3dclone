@@ -8,7 +8,24 @@ import type { FurniturePack, PackItem, PackMesh, PackPart } from "./packs.ts";
 export const OWN_PACK_ID = "own.models";
 
 /** What an imported model is: decides what a linked entity does with it. */
-export const MODEL_KINDS = ["furniture", "lamp_ceiling", "lamp_pendant", "lamp_floor", "lamp_table", "lamp_wall", "lamp_strip", "tv", "appliance", "sensor"] as const;
+export const MODEL_KINDS = [
+  "furniture",
+  "lamp_ceiling",
+  "lamp_pendant",
+  "lamp_floor",
+  "lamp_table",
+  "lamp_wall",
+  "lamp_strip",
+  "tv",
+  "appliance",
+  "washer",
+  "dryer",
+  "dishwasher",
+  "oven",
+  "fridge",
+  "plant",
+  "sensor",
+] as const;
 export type ModelKind = (typeof MODEL_KINDS)[number];
 
 /** The library category a kind belongs in (offered when the kind is picked). */
@@ -22,6 +39,12 @@ export const KIND_GROUP: Record<ModelKind, string> = {
   lamp_strip: "lamp",
   tv: "media",
   appliance: "appliance",
+  washer: "appliance",
+  dryer: "appliance",
+  dishwasher: "kitchen",
+  oven: "kitchen",
+  fridge: "kitchen",
+  plant: "plant",
   sensor: "tech",
 };
 
@@ -94,6 +117,11 @@ function behaviour(kind: ModelKind): Partial<PackItem> {
     case "tv":
       return { electric: true, parts: [TV_SCREEN] };
     case "appliance":
+    case "washer":
+    case "dryer":
+    case "dishwasher":
+    case "oven":
+    case "fridge":
       return { electric: true };
     case "sensor":
       return { family: "sensor" };
@@ -106,6 +134,11 @@ function behaviour(kind: ModelKind): Partial<PackItem> {
 export function modelKindOf(item: Pick<PackItem, "tags">): ModelKind {
   const tag = item.tags?.find((t) => t.startsWith("kind:"))?.slice(5);
   return (MODEL_KINDS as readonly string[]).includes(tag ?? "") ? (tag as ModelKind) : "furniture";
+}
+
+/** The kind of an own model placed as `type` ("pack:own.models:<id>"), null for any other furniture. */
+export function ownKind(type: string, item: Pick<PackItem, "tags"> | undefined): ModelKind | null {
+  return item && type.startsWith(`pack:${OWN_PACK_ID}:`) ? modelKindOf(item) : null;
 }
 
 /** The pack the models make (null without any); a model that does not decode is left out. */

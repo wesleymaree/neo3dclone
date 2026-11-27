@@ -129,3 +129,19 @@ test("what a model is decides how it behaves", () => {
   // its outline is then found when drawn, with the same rules
   assert.equal(meshEdges(old.mesh!).length / 2, 12);
 });
+
+test("an imported washer, fridge or plant gets the household options of the built-in ones", async () => {
+  const { applianceOf, isFridge, isPlainFridge, isPackPlant } = await import("../household.ts");
+  const { packType, setPacks } = await import("../packs.ts");
+  const p = prepare(parseObj(BOX_OBJ), "cm", false);
+  const kinds = ["washer", "dryer", "dishwasher", "oven", "fridge", "plant", "furniture"];
+  const pack = modelsPack(kinds.map((kind) => ({ id: kind, name: kind, size: p.size, kind: kind as never, mesh: p.mesh })))!;
+  setPacks([pack]);
+  const type = (id: string) => packType(OWN_PACK_ID, id);
+  assert.deepEqual(kinds.map((k) => applianceOf(type(k))), ["washer", "dryer", "dishwasher", "oven", null, null, null]);
+  assert.ok(pack.items.find((it) => it.id === "washer")?.electric);
+  assert.deepEqual(kinds.map((k) => isFridge(type(k))), [false, false, false, false, true, false, false]);
+  assert.ok(isPlainFridge(type("fridge")) && isFridge("fridge_smart") && !isPlainFridge("fridge_smart"));
+  assert.deepEqual(kinds.map((k) => isPackPlant(type(k))), [false, false, false, false, false, true, false]);
+  setPacks([]);
+});

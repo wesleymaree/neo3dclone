@@ -32,7 +32,7 @@ import { hasLiveParts, type PackSlot } from "../live-parts.ts";
 import { loadLocate } from "../load-locate.ts";
 import { isBeta, supporterUrl } from "../beta.ts";
 import { openPrint } from "../print.ts";
-import { applianceOf, BIN_SHAPES, BIN_SIZE, binColors, binShape, householdCountry, isPackPlant, MAILBOX_SHAPES, MAILBOX_SIZE, mailboxShape, WASTE_KINDS, wasteColors } from "../household.ts";
+import { applianceOf, BIN_SHAPES, BIN_SIZE, binColors, binShape, householdCountry, isFridge, isPackPlant, isPlainFridge, MAILBOX_SHAPES, MAILBOX_SIZE, mailboxShape, WASTE_KINDS, wasteColors } from "../household.ts";
 import { cameraMotionSensors, cameraOwnSensors, detectionKind, setCameraSensors } from "../markers.ts";
 import { backdropImage } from "../backdrop.ts";
 import { screenName, setScreenName, setVoiceArea, setVoiceHere, setVoicePipeline, voiceArea, voiceOnHere, voicePipeline } from "../load-voice.ts";
@@ -12938,7 +12938,7 @@ export class Fp3dEditor extends LitElement {
   private renderHouseholdExtras(f: Furniture) {
     const plant = f.type === "plant" || isPackPlant(f.type);
     const appliance = !!applianceOf(f.type);
-    const fridge = f.type === "fridge" || f.type === "fridge_smart";
+    const fridge = isFridge(f.type);
     const electric = isElectric(f.type);
     if (!plant && !electric) return nothing;
     if (!hasFeature("household")) {
@@ -12968,7 +12968,7 @@ export class Fp3dEditor extends LitElement {
             <p class="fp3d-sub fp3d-wide">${this.t("hh_appliance_hint")}</p>`
         : nothing}
       ${fridge
-        ? html`${f.type === "fridge" ? this.entitySelect(this.t("hh_fridge_door"), f.door_left ?? null, undefined, doors, (v) => this.updateFurniture({ door_left: ref(v) })) : nothing}
+        ? html`${isPlainFridge(f.type) ? this.entitySelect(this.t("hh_fridge_door"), f.door_left ?? null, undefined, doors, (v) => this.updateFurniture({ door_left: ref(v) })) : nothing}
             ${this.num(this.t("hh_door_alarm"), f.door_alarm ?? 2, (v) => this.updateFurniture({ door_alarm: Math.max(0.5, Math.min(120, v)) }), 0.5)}`
         : nothing}
       ${electric
